@@ -29,9 +29,10 @@
 
   <ItemGroup>
     <Folder Include="Domain\Enums\" />
-    <Folder Include="Infrastructure\Configurations\" />
-    <Folder Include="Infrastructure\Repositories\" />
-    <Folder Include="Shared\" />
+    <Folder Include="Features\Accounts\Endpoints\" />
+    <Folder Include="Shared\Exceptions\" />
+    <Folder Include="Shared\Helpers\" />
+    <Folder Include="Shared\Responses\" />
   </ItemGroup>
 
 </Project>
