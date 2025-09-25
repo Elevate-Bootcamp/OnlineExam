@@ -1,6 +1,6 @@
 ﻿namespace OnlineExam.Domain.Interfaces
 {
-    public interface IQuestionRepository
+    public interface IQuestionRepository: IGenericRepository<Question>
     {
     }
 }

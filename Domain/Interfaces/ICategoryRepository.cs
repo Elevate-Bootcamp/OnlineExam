@@ -1,6 +1,6 @@
 ﻿namespace OnlineExam.Domain.Interfaces
 {
-    public interface ICategoryRepository
+    public interface ICategoryRepository: IGenericRepository<Category>
     {
     }
 }

@@ -7,5 +7,10 @@ namespace OnlineExam.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
+        [HttpGet]
+        public IActionResult GetCategories()
+        {
+            return Ok(new { Message = "GetCategories endpoint" });
+        }
     }
 }

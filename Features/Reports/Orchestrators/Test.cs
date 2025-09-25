@@ -1,4 +1,4 @@
-﻿namespace OnlineExam.Features.Reports.Commands
+﻿namespace OnlineExam.Features.Reports.Orchestrators
 {
     public class Test
     {

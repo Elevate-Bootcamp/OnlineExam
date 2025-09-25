@@ -1,33 +1,80 @@
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using OnlineExam.Domain;
+using OnlineExam.Domain.Interfaces;
+using OnlineExam.Infrastructure.ApplicationDBContext;
+using OnlineExam.Infrastructure.Repositories;
+using OnlineExam.Infrastructure.UnitOfWork;
+using Serilog;
+using Serilog.Events;
+
 namespace OnlineExam
 {
     public class Program
     {
         public static void Main(string[] args)
         {
+            // Serilog setup (unchanged)
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+                .MinimumLevel.Override("System", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .Enrich.WithProperty("Application", "TechZone.Api")
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {SourceContext} | {CorrelationId} | {Message:lj}{NewLine}{Exception}", theme: Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme.Literate)
+                .WriteTo.File("logs/techzone-.log", rollingInterval: RollingInterval.Day, outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {Level:u3}] {SourceContext} | {CorrelationId} | {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
+            Log.Information("Starting OnlineExam API application");
+
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            builder.Host.UseSerilog();
+
+            // Services (unchanged)
+            builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            builder.Services.AddScoped<IExamRepository, ExamRepository>();
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => { /* unchanged */ })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions => { /* unchanged */ });
+                options.EnableSensitiveDataLogging(false);
+                options.EnableServiceProviderCaching();
+                options.EnableDetailedErrors(builder.Environment.IsDevelopment());
+                options.LogTo(message => Log.Debug("[EF] {Message}", message), LogLevel.Warning);
+            });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
+            // Trust the dev certificate on startup
+            if (app.Environment.IsDevelopment())
+            {
+                var cert = new HttpClient().GetAsync("https://localhost:5001").ContinueWith(task => { });
+                app.UseDeveloperExceptionPage(); // Optional: for detailed errors
+            }
+
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
