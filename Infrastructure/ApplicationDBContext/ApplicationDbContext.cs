@@ -11,8 +11,7 @@ namespace OnlineExam.Infrastructure.ApplicationDBContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-        }
-
+        }   
         public DbSet<UserAnswer> Answers { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Question> Questions { get; set; }

@@ -1,3 +1,4 @@
+using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,7 @@ namespace OnlineExam
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Host.UseSerilog();
-
+            builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
             // Services (unchanged)
             builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -50,12 +51,15 @@ namespace OnlineExam
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions => { /* unchanged */ });
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),sqlOptions => { /* unchanged */ });
                 options.EnableSensitiveDataLogging(false);
                 options.EnableServiceProviderCaching();
                 options.EnableDetailedErrors(builder.Environment.IsDevelopment());
-                options.LogTo(message => Log.Debug("[EF] {Message}", message), LogLevel.Warning);
+                options.LogTo(message => Log.Debug("[EF] {Message}",message),LogLevel.Warning);
             });
+            //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            //builder.Services.AddDbContext<ApplicationDbContext>(opt =>
+            //    opt.UseSqlServer(connectionString));
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -76,12 +80,26 @@ namespace OnlineExam
                 var cert = new HttpClient().GetAsync("https://localhost:5001").ContinueWith(task => { });
                 app.UseDeveloperExceptionPage(); // Optional: for detailed errors
             }
-
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
             app.MapGet("/", () => "OnlineExam API is running...");
             app.MapRegisterEndpoint(); // Map the register endpoint
+
+            app.Use(async (ctx,next) =>
+            {
+                try { await next(); }
+                catch(FluentValidation.ValidationException ex)
+                {
+                    var dict = ex.Errors
+                        .GroupBy(e => e.PropertyName ?? "")
+                        .ToDictionary(g => g.Key,g => g.Select(e => e.ErrorMessage).ToArray());
+                    await Results.ValidationProblem(dict).ExecuteAsync(ctx);
+                }
+            });
+
+
             app.Run();
         }
     }
