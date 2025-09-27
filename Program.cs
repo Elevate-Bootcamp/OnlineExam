@@ -1,8 +1,10 @@
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
+using OnlineExam.Features.Accounts.Commands;
+using OnlineExam.Features.Accounts.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
 using OnlineExam.Infrastructure.UnitOfWork;
@@ -57,6 +59,7 @@ namespace OnlineExam
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(RegisterCommand).Assembly));
 
             var app = builder.Build();
 
@@ -76,7 +79,8 @@ namespace OnlineExam
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
-
+            app.MapGet("/", () => "OnlineExam API is running...");
+            app.MapRegisterEndpoint(); // Map the register endpoint
             app.Run();
         }
     }
