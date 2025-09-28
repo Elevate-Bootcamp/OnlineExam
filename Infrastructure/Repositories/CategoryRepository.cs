@@ -1,4 +1,5 @@
-﻿using OnlineExam.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using System.Linq.Expressions;
@@ -7,56 +8,75 @@ namespace OnlineExam.Infrastructure.Repositories
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private ApplicationDbContext context;
+        private ApplicationDbContext _context;
 
         public CategoryRepository(ApplicationDbContext context)
         {
-            this.context = context;
+            _context = context;
         }
 
-        public Task AddAsync(Category entity)
+        public async Task AddAsync(Category entity)
         {
-            throw new NotImplementedException();
+          await  _context.Categories.AddAsync(entity);
+
+            
         }
 
-        public Task AddRangeAsync(IEnumerable<Category> entities)
+        public async Task AddRangeAsync(IEnumerable<Category> entities)
         {
-            throw new NotImplementedException();
+            await _context.Categories.AddRangeAsync(entities);    
         }
 
-        public Task<int> CountAsync(Expression<Func<Category, bool>>? criteria = null)
+        public async Task<int> CountAsync(Expression<Func<Category, bool>>? criteria = null)
         {
-            throw new NotImplementedException();
+            if (criteria != null)
+                return await _context.Categories.CountAsync(criteria);
+            return await _context.Categories.CountAsync();
         }
 
         public void Delete(Category entity)
         {
-            throw new NotImplementedException();
+            _context.Categories.Remove(entity);
         }
 
         public void DeleteRange(IEnumerable<Category> entities)
         {
-            throw new NotImplementedException();
+            _context.Categories.RemoveRange(entities);
         }
 
-        public Task<Category> FirstOrDefaultAsync(Expression<Func<Category, bool>> criteria, params Expression<Func<Category, object>>[] includes)
+        public async Task<Category> FirstOrDefaultAsync(Expression<Func<Category, bool>> criteria, params Expression<Func<Category, object>>[] includes)
         {
-            throw new NotImplementedException();
+            IQueryable<Category> query = _context.Categories;
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+            return await query.FirstOrDefaultAsync(criteria);
         }
 
-        public Task<IEnumerable<Category>> GetAllAsync(params Expression<Func<Category, object>>[] includes)
+        public async Task<IEnumerable<Category>> GetAllAsync(params Expression<Func<Category, object>>[] includes)
         {
-            throw new NotImplementedException();
+            IQueryable<Category> query = _context.Categories;
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+            return await query.ToListAsync();
         }
 
-        public Task<Category> GetByIdAsync(int id, params Expression<Func<Category, object>>[] includes)
+        public async Task<Category> GetByIdAsync(int id, params Expression<Func<Category, object>>[] includes)
         {
-            throw new NotImplementedException();
+            IQueryable<Category> query = _context.Categories;
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+            return await query.FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public void Update(Category entity)
         {
-            throw new NotImplementedException();
+            _context.Categories.Update(entity);
         }
     }
 }
