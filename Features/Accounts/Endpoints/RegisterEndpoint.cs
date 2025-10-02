@@ -9,19 +9,10 @@ namespace OnlineExam.Features.Accounts.Endpoints
     {
         public static void MapRegisterEndpoint(this WebApplication app)
         {
-            app.MapPost("/api/accounts/register", async (UserDto request, IMediator mediator) =>
+            app.MapPost("/api/accounts/register", async (RegisterDto request, IMediator mediator) =>
             {
-                var accountService = await mediator.Send(new RegisterCommand(
-                    request.UserName ?? string.Empty,
-                    request.Email ?? string.Empty,
-                    request.FullName ?? string.Empty,
-                    request.Password ?? string.Empty
-                ));
-                if (accountService is null)
-                {
-                    return Results.BadRequest(accountService);
-                }
-                return Results.Ok("User registered successfully.");
+                var result = await mediator.Send(new RegisterCommand(request));
+                return result;
             })
             .WithName("Register")
             .WithTags("Accounts");

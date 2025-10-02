@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using OnlineExam.Features.Accounts.Dtos;
+using OnlineExam.Shared.Responses;
 
 namespace OnlineExam.Features.Accounts.Endpoints
 {
@@ -10,7 +11,7 @@ namespace OnlineExam.Features.Accounts.Endpoints
         {
             app.MapPost("/api/accounts/login", async (LoginReqDTO request, IMediator mediator) =>
             {
-                IResult result = await mediator.Send(new Commands.LoginCommand(request));
+                var result = await mediator.Send(new Commands.LoginCommand(request));
 
                 return result;
             })

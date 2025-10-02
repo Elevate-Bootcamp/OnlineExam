@@ -12,6 +12,7 @@ using OnlineExam.Features.Accounts.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
 using OnlineExam.Infrastructure.UnitOfWork;
+using OnlineExam.Shared.Data;
 using OnlineExam.Shared.Helpers;
 using Serilog;
 using Serilog.Events;
@@ -22,7 +23,7 @@ namespace OnlineExam
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             // Serilog setup (unchanged)
             Log.Logger = new LoggerConfiguration()
@@ -133,6 +134,29 @@ namespace OnlineExam
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            }
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    Log.Information("📊 Starting database seeding...");
+
+
+                    await DatabaseSeeder.SeedAsync(services);
+                    Log.Information("🌱 Database seeding completed successfully");
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "❌ An error occurred while seeding the database");
+
+                    if (app.Environment.IsDevelopment())
+                    {
+                        throw;
+                    }
+
+                    Log.Warning("⚠️ Application will continue without seeding");
+                }
             }
 
             // Trust the dev certificate on startup

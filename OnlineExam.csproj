@@ -35,8 +35,6 @@
 
   <ItemGroup>
     <Folder Include="Domain\Enums\" />
-    <Folder Include="Shared\Exceptions\" />
-    <Folder Include="Shared\Responses\" />
   </ItemGroup>
 
 </Project>
