@@ -50,7 +50,6 @@ namespace OnlineExam
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            
 
 
 

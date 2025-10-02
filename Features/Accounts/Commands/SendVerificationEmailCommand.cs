@@ -100,15 +100,18 @@ namespace OnlineExam.Features.Accounts.Commands
             }
 
             // Adapted from your old SendEmailDirectlyAsync
+            // In SendVerificationEmailCommand.Handler.SendEmailDirectlyAsync
             private async Task<bool> SendEmailDirectlyAsync(EmailQueue emailItem)
             {
                 try
                 {
-                    _logger.LogInformation("Starting email send process for {Email}", emailItem.ToEmail);
+                    _logger.LogInformation("Starting email send for {Email}. Server: {Server}, Port: {Port}, SSL: {Ssl}",
+                        emailItem.ToEmail, _emailSettings.SmtpServer, _emailSettings.Port, _emailSettings.EnableSsl);
 
                     if (string.IsNullOrEmpty(_emailSettings.SmtpServer) || string.IsNullOrEmpty(_emailSettings.Username))
                     {
-                        _logger.LogError("Email configuration incomplete");
+                        _logger.LogError("Email config incomplete: Server={Server}, Username={Username}",
+                            _emailSettings.SmtpServer ?? "NULL", _emailSettings.Username ?? "NULL");
                         return false;
                     }
 
@@ -129,22 +132,48 @@ namespace OnlineExam.Features.Accounts.Commands
                     emailMessage.Body = builder.ToMessageBody();
 
                     using var client = new SmtpClient();
-                    var secureSocketOptions = _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None; // Adapt for port
-                    await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.Port, secureSocketOptions);
-                    await client.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);
-                    await client.SendAsync(emailMessage);
-                    await client.DisconnectAsync(true);
 
-                    _logger.LogInformation("Email sent successfully to: {Email}", emailItem.ToEmail);
+                    // Gmail-specific SSL options
+                    SecureSocketOptions secureOptions;
+                    if (_emailSettings.Port == 587)
+                    {
+                        secureOptions = SecureSocketOptions.StartTls;  // Recommended for Gmail
+                        _logger.LogInformation("Using StartTls for Port 587");
+                    }
+                    else if (_emailSettings.Port == 465)
+                    {
+                        secureOptions = SecureSocketOptions.SslOnConnect;  // For implicit SSL
+                        _logger.LogInformation("Using SslOnConnect for Port 465");
+                    }
+                    else
+                    {
+                        secureOptions = SecureSocketOptions.Auto;
+                        _logger.LogInformation("Using Auto for Port {_Port}", _emailSettings.Port);
+                    }
+
+                    await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.Port, secureOptions);
+                    _logger.LogInformation("Connected to SMTP server");
+
+                    await client.AuthenticateAsync(_emailSettings.Username, _emailSettings.Password);
+                    _logger.LogInformation("SMTP authentication successful");
+
+                    await client.SendAsync(emailMessage);
+                    _logger.LogInformation("Email sent to {Email}", emailItem.ToEmail);
+
+                    await client.DisconnectAsync(true);
                     return true;
+                }
+                catch (AuthenticationException authEx)
+                {
+                    _logger.LogError(authEx, "SMTP Authentication failed for {Email}. Check app password.", emailItem.ToEmail);
+                    return false;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error sending email to {Email}", emailItem.ToEmail);
+                    _logger.LogError(ex, "SMTP error for {Email}: {Message}", emailItem.ToEmail, ex.Message);
                     return false;
                 }
             }
-
             // Adapted from your old UpdateEmailStatusAsync
             private async Task UpdateEmailStatusAsync(Guid emailId, EmailStatus status, string? errorMessage = null)
             {
