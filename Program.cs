@@ -1,7 +1,10 @@
-using MediatR;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Accounts.Commands;
@@ -9,8 +12,11 @@ using OnlineExam.Features.Accounts.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
 using OnlineExam.Infrastructure.UnitOfWork;
+using OnlineExam.Shared.Helpers;
 using Serilog;
 using Serilog.Events;
+using System.Configuration;
+using System.Text;
 
 namespace OnlineExam
 {
@@ -44,9 +50,68 @@ namespace OnlineExam
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => { /* unchanged */ })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+
+
+            builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+            var JwtOption = builder.Configuration.GetSection("JWT").Get<JWT>();
+            builder.Services.AddSingleton(JwtOption);
+
+             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => { /* unchanged */ })
+                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                 .AddDefaultTokenProviders();
+
+
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme; // Add this
+            })
+        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidIssuer = JwtOption.Issuer,
+                ValidAudience = JwtOption.Audience,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(JwtOption.Secretkey)),
+                ClockSkew = TimeSpan.FromMinutes(5)
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    Console.WriteLine($"🔴 AUTH FAILED: {context.Exception.Message}");
+                    Console.WriteLine($"🔴 Exception: {context.Exception}");
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = context =>
+                {
+                    Console.WriteLine($"🟢 TOKEN VALIDATED");
+                    Console.WriteLine($"🟢 User: {context.Principal.Identity.Name}");
+                    Console.WriteLine($"🟢 IsAuthenticated: {context.Principal.Identity.IsAuthenticated}");
+                    return Task.CompletedTask;
+                },
+                OnChallenge = context =>
+                {
+                    Console.WriteLine($"🟡 CHALLENGE: {context.Error}");
+                    Console.WriteLine($"🟡 Description: {context.ErrorDescription}");
+                    return Task.CompletedTask;
+                },
+                OnMessageReceived = context =>
+                {
+                    Console.WriteLine($"🔵 MESSAGE RECEIVED: {context.Token}");
+                    return Task.CompletedTask;
+                }
+            };
+        });
+
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -78,11 +143,26 @@ namespace OnlineExam
             }
 
             app.UseHttpsRedirection();
+            app.UseRouting();
+            // Add this BEFORE authentication
+            app.Use(async (context, next) =>
+            {
+                var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+                Console.WriteLine($"[DEBUG] Auth Header: {authHeader}");
+                Log.Information("Auth Header: {AuthHeader}", authHeader);
+                await next();
+            });
+
+            app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
             app.MapGet("/", () => "OnlineExam API is running...");
             app.MapRegisterEndpoint(); // Map the register endpoint
+            app.MapTestEndpoint();
+            app.MapLoginEndpoint(); // Map the login endpoint
+
             app.Run();
+
         }
     }
 }
