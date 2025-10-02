@@ -1,7 +1,6 @@
 ﻿using Humanizer;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using OnlineExam.Domain;
 using OnlineExam.Features.Accounts.Dtos;
 using OnlineExam.Shared.Helpers;
@@ -9,36 +8,35 @@ using OnlineExam.Shared.Responses;
 
 namespace OnlineExam.Features.Accounts.Commands
 {
-    public record RegisterCommand(RegisterDto RegisterDto) : IRequest<ServiceResponse<bool>>
+    public record RegisterCommand(RegisterDto RegisterDto) : IRequest<ServiceResponse<ApplicationUser>>
     {
-        public class RegisterCommandHandler : IRequestHandler<RegisterCommand, ServiceResponse<bool>>
+        public class Handler : IRequestHandler<RegisterCommand, ServiceResponse<ApplicationUser>>
         {
             private readonly JWT _jwtOptions;
             private readonly UserManager<ApplicationUser> userManager;
             private readonly ILogger<RegisterCommand> _logger;
-            public RegisterCommandHandler(UserManager<ApplicationUser> userManager
-                , JWT jwtoptions,
-                  ILogger<RegisterCommand> logger)
+
+            public Handler(UserManager<ApplicationUser> userManager, JWT jwtOptions, ILogger<RegisterCommand> logger)
             {
-                _jwtOptions = jwtoptions;
+                _jwtOptions = jwtOptions;
                 this.userManager = userManager;
                 _logger = logger;
             }
-            public async Task<ServiceResponse<bool>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+
+            public async Task<ServiceResponse<ApplicationUser>> Handle(RegisterCommand request, CancellationToken cancellationToken)
             {
                 // Check if email is already registered
                 if (await userManager.FindByEmailAsync(request.RegisterDto.Email) is not null)
                 {
-                    return ServiceResponse<bool>.ConflictResponse(
-                        "Email is already registered");
+                    return ServiceResponse<ApplicationUser>.ConflictResponse("Email is already registered");
                 }
 
                 // Check if username is already registered
                 if (await userManager.FindByNameAsync(request.RegisterDto.UserName) is not null)
                 {
-                    return ServiceResponse<bool>.ConflictResponse(
-                        "Username is already registered");
+                    return ServiceResponse<ApplicationUser>.ConflictResponse("Username is already registered");
                 }
+
                 var user = new ApplicationUser
                 {
                     Email = request.RegisterDto.Email,
@@ -46,30 +44,32 @@ namespace OnlineExam.Features.Accounts.Commands
                     FullName = request.RegisterDto.FullName,
                     EmailConfirmed = false
                 };
+
                 var result = await userManager.CreateAsync(user, request.RegisterDto.Password);
                 if (!result.Succeeded)
                 {
                     var errors = result.Errors.Select(e => e.Description).ToList();
-                    return ServiceResponse<bool>.ValidationErrorResponse(
+                    return ServiceResponse<ApplicationUser>.ValidationErrorResponse(
                         new Dictionary<string, List<string>> { { "Password", errors } },
-                        "Registration failed");
+                        "Registration failed"
+                    );
                 }
 
                 // Add user to default role
                 await userManager.AddToRoleAsync(user, "User");
 
-                // Get the user ID for verification code
-                var userId = (user.Id);
+                // Get the user ID for verification code (your original logic)
+                var userId = user.Id;
 
-                // Create verification code
-
-
-
+                // Create verification code (your original, but not used here—pass to orchestrator)
+                // var verificationCode = GenerateVerificationCode(); // Move to email command
 
                 _logger.LogInformation("User {Email} registered successfully", user.Email);
-                return ServiceResponse<bool>.SuccessResponse(true,
+                return ServiceResponse<ApplicationUser>.SuccessResponse(
+                    user,
                     "Registration completed successfully. Please check your email for verification code.",
-                    "تمت العملية بنجاح تأكد من بريدك لكود التفعيل");
+                    "تمت العملية بنجاح تأكد من بريدك لكود التفعيل"
+                );
             }
         }
     }

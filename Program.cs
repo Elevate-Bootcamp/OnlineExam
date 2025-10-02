@@ -50,6 +50,7 @@ namespace OnlineExam
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            
 
 
 
@@ -128,6 +129,8 @@ namespace OnlineExam
             builder.Services.AddSwaggerGen();
             builder.Services.AddMediatR(typeof(Program).Assembly);
 
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -158,6 +161,7 @@ namespace OnlineExam
                     Log.Warning("⚠️ Application will continue without seeding");
                 }
             }
+
 
             // Trust the dev certificate on startup
             if (app.Environment.IsDevelopment())

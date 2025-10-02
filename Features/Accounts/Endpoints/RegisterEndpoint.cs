@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.Data;
 using OnlineExam.Features.Accounts.Commands;
 using OnlineExam.Features.Accounts.Dtos;
+using OnlineExam.Features.Accounts.Orchestrators;
 
 namespace OnlineExam.Features.Accounts.Endpoints
 {
@@ -11,11 +12,12 @@ namespace OnlineExam.Features.Accounts.Endpoints
         {
             app.MapPost("/api/accounts/register", async (RegisterDto request, IMediator mediator) =>
             {
-                var result = await mediator.Send(new RegisterCommand(request));
-                return result;
+                var result = await mediator.Send(new OrchestrateRegistrationCommand(request));
+                return Results.Json(result, statusCode: result.StatusCode);
             })
             .WithName("Register")
             .WithTags("Accounts");
         }
+
     }
 }
