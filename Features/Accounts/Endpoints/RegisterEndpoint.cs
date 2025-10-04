@@ -17,7 +17,7 @@ namespace OnlineExam.Features.Accounts.Endpoints
             })
             .WithName("Register")
             .WithTags("Accounts");
-        }
+                }
 
     }
 }
