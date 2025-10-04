@@ -2,7 +2,7 @@
 
 namespace OnlineExam.Features.Questions.Queries
 {
-    public record GetQuestionTypesQuery(int id) :IRequest<string>
+    public record GetQuestionTypesQuery(int id) :IRequest<string>;
     public class GetQuestionTypesHandler : IRequestHandler<GetQuestionTypesQuery, string>
     {
         public GetQuestionTypesHandler()
