@@ -9,11 +9,13 @@ namespace OnlineExam.Features.Questions.Commands
     public class CreateQuestionHandler : IRequestHandler <CreateQuestionCommand,string>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenericRepository<Question> _questionRepository;
 
 
-        public CreateQuestionHandler(IUnitOfWork unitOfWork)
+        public CreateQuestionHandler(IUnitOfWork unitOfWork, IGenericRepository<Question> questionRepository)
         {
             _unitOfWork = unitOfWork;
+            _questionRepository = questionRepository;
         }
         public async Task<string> Handle(CreateQuestionCommand request,CancellationToken cancellationToken)
         {
@@ -26,7 +28,8 @@ namespace OnlineExam.Features.Questions.Commands
                     Type = request.questionDTO.Type,
                     CreationDate = DateTime.UtcNow,
                 };
-                var item =  _unitOfWork.Question.AddAsync(question);
+                await _questionRepository.AddAsync(question);
+                await _unitOfWork.SaveChangesAsync();
                 return "Question created successfully";
             }
             catch(Exception ex)

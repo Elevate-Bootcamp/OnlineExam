@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Categories.Dtos;
 using OnlineExam.Features.Categories.Queries;
 
-namespace OnlineExam.Features.Categories.Handelrs
+namespace OnlineExam.Features.Categories.Handlers
 {
-    public class GetCategoriesQueryForAdminHandler(ICategoryRepository _categoryRepository) : IRequestHandler<GetCategoriesQueryForAdmin, List<AdminCategoryDto>>
+    public class GetCategoriesQueryForAdminHandler(IGenericRepository<Category> _categoryRepository) : IRequestHandler<GetCategoriesQueryForAdmin, List<AdminCategoryDto>>
     {
         public async Task<List<AdminCategoryDto>> Handle(GetCategoriesQueryForAdmin request, CancellationToken cancellationToken)
         {

@@ -1,10 +1,11 @@
 ﻿using MediatR;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Categories.Commands;
 
-namespace OnlineExam.Features.Categories.Handelrs
+namespace OnlineExam.Features.Categories.Handlers
 {
-    public class UpdateCategoryCommandHandler(ICategoryRepository _categoryRepository , IUnitOfWork _unitOfWork) : IRequestHandler<UpdateCategoryCommand, int>
+    public class UpdateCategoryCommandHandler(IGenericRepository<Category> _categoryRepository , IUnitOfWork _unitOfWork) : IRequestHandler<UpdateCategoryCommand, int>
     {
         public async Task<int> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
         {

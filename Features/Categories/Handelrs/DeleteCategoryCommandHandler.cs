@@ -1,10 +1,11 @@
 ﻿using MediatR;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Categories.Commands;
 
 namespace OnlineExam.Features.Categories.Handelrs
 {
-    public class DeleteCategoryCommandHandler(ICategoryRepository _categoryRepository , IUnitOfWork _unitOfWork) : IRequestHandler<DeleteCategoryCommand, bool>
+    public class DeleteCategoryCommandHandler(IGenericRepository<Category> _categoryRepository , IUnitOfWork _unitOfWork) : IRequestHandler<DeleteCategoryCommand, bool>
     {
         public async Task<bool> Handle(DeleteCategoryCommand request, CancellationToken cancellationToken)
         {

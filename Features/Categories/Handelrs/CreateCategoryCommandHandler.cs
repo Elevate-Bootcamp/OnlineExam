@@ -5,9 +5,9 @@ using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Categories.Commands;
 
-namespace OnlineExam.Features.Categories.Handelrs
+namespace OnlineExam.Features.Categories.Handlers
 {
-    public class CreateCategoryCommandHandler(ICategoryRepository _categoryRepository , IUnitOfWork _unitOfWork) : IRequestHandler<CreateCategoryCommand, int>
+    public class CreateCategoryCommandHandler(IGenericRepository<Category> _categoryRepository , IUnitOfWork _unitOfWork) : IRequestHandler<CreateCategoryCommand, int>
     {
        
 
@@ -36,7 +36,7 @@ namespace OnlineExam.Features.Categories.Handelrs
             };
 
             await _categoryRepository.AddAsync(category);
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.SaveChangesAsync();
             return category.Id;
 
         }

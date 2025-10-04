@@ -47,12 +47,6 @@ namespace OnlineExam
             builder.Host.UseSerilog();
             builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
             // Services (unchanged)
-            builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
-            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-            builder.Services.AddScoped<IExamRepository, ExamRepository>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
 
 
             builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
