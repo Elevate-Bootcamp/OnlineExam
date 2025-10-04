@@ -1,6 +1,18 @@
-﻿namespace OnlineExam.Features.Exams.Commands
+﻿using MediatR;
+
+namespace OnlineExam.Features.Exams.Commands
 {
-    public class CreateExamCommand
-    {
-    }
+    public sealed record CreateExamCommand(
+     string Title,
+     string IconUrl,
+     int? CategoryId,
+     DateTime StartDate,
+     DateTime EndDate,
+     int DurationMinutes,
+     string? Description
+                               ):IRequest<int>;
+
 }
+
+
+

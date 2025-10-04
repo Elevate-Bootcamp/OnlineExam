@@ -1,6 +1,7 @@
-﻿namespace OnlineExam.Features.Categories.Commands
+﻿using MediatR;
+using OnlineExam.Features.Categories.Dtos;
+
+namespace OnlineExam.Features.Categories.Commands
 {
-    public class CreateCategoryCommand 
-    {
-    }
+    public record CreateCategoryCommand(createCategoryDTo CreateCategoryDTo) : IRequest<int>;
 }

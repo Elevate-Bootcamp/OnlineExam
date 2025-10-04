@@ -18,7 +18,5 @@ namespace OnlineExam.Domain
         // navigation property
         public Category? Category { get; set; }
 
-
-
     }
 }

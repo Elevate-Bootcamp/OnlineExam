@@ -1,6 +1,7 @@
-﻿namespace OnlineExam.Features.Categories.Commands
+﻿using MediatR;
+
+namespace OnlineExam.Features.Categories.Commands
 {
-    public class DeleteCategoryCommand
-    {
-    }
+    public record DeleteCategoryCommand(int Id) : IRequest<bool>;
+
 }
