@@ -23,7 +23,7 @@ namespace OnlineExam.Features.Exams.Handler
                 StartDate = cmd.StartDate,
                 EndDate = cmd.EndDate,
                 Duration = cmd.DurationMinutes,
-                CreationDate = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
                 IsActive = true,
                 Description = string.IsNullOrWhiteSpace(cmd.Description) ? null : cmd.Description!.Trim()
             };

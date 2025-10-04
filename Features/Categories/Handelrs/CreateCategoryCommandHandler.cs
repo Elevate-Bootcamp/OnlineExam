@@ -32,7 +32,7 @@ namespace OnlineExam.Features.Categories.Handlers
             {
                 Title = request.CreateCategoryDTo.Title,
                 IconUrl = "/uploads/" + uniqueFileName,
-                CreationDate = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow
             };
 
             await _categoryRepository.AddAsync(category);

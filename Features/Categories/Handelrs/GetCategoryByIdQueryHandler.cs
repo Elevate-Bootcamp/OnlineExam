@@ -20,7 +20,7 @@ namespace OnlineExam.Features.Categories.Handlers
                 Id = category.Id,
                 Title = category.Title,
                 IconUrl = category.IconUrl,
-                CreationDate = category.CreationDate
+                CreationDate = category.CreatedAt
             };
         }
     }

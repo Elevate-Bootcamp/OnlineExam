@@ -26,7 +26,7 @@ namespace OnlineExam.Features.Questions.Commands
                     Title = request.questionDTO.Title,
                     ExamId = request.questionDTO.ExamId,
                     Type = request.questionDTO.Type,
-                    CreationDate = DateTime.UtcNow,
+                    CreatedAt = DateTime.UtcNow,
                 };
                 await _questionRepository.AddAsync(question);
                 await _unitOfWork.SaveChangesAsync();

@@ -29,7 +29,7 @@ namespace OnlineExam.Features.Categories.Handlers
             }
 
              _categoryRepository.Update(category);
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.SaveChangesAsync();
             return category.Id;
         }
     }

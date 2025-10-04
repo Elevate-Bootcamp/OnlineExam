@@ -10,9 +10,26 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
         {
             builder.ToTable("UserAnswers");
 
+            // BaseEntity properties
             builder.HasKey(ua => ua.Id);
             builder.Property(ua => ua.Id).ValueGeneratedOnAdd();
 
+            builder.Property(ua => ua.CreatedAt)
+                .IsRequired()
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("GETDATE()")
+                .HasColumnName("CreatedAt");
+
+            builder.Property(ua => ua.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("UpdatedAt");
+
+            builder.Property(ua => ua.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false)
+                .HasColumnName("IsDeleted");
+
+            // Specific properties
             builder.Property(ua => ua.AttemptId)
                 .IsRequired()
                 .HasColumnName("AttemptId");
@@ -31,7 +48,7 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
                 .HasColumnName("IsCorrect");
 
             builder.HasOne(ua => ua.Attempt)
-                .WithMany(a => a.UserAnswers) // Assuming a collection in UserExamAttempt
+                .WithMany(a => a.UserAnswers)
                 .HasForeignKey(ua => ua.AttemptId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

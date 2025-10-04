@@ -21,7 +21,7 @@ namespace OnlineExam.Features.Categories.Handelrs
             }
 
             _categoryRepository.Delete(category);
-            await _unitOfWork.CompleteAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return true;
         }

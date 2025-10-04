@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OnlineExam.Domain;
+using OnlineExam.Domain.Enums;
 
 namespace OnlineExam.Infrastructure.EntityConfigurations
 {
@@ -10,9 +11,26 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
         {
             builder.ToTable("Questions");
 
+            // BaseEntity properties
             builder.HasKey(q => q.Id);
             builder.Property(q => q.Id).ValueGeneratedOnAdd();
 
+            builder.Property(q => q.CreatedAt)
+                .IsRequired()
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("GETDATE()")
+                .HasColumnName("CreatedAt");
+
+            builder.Property(q => q.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("UpdatedAt");
+
+            builder.Property(q => q.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false)
+                .HasColumnName("IsDeleted");
+
+            // Specific properties
             builder.Property(q => q.Title)
                 .IsRequired()
                 .HasMaxLength(500)
@@ -20,17 +38,13 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
 
             builder.Property(q => q.Type)
                 .IsRequired()
+                .HasConversion<string>()  // For enum to string
                 .HasMaxLength(50)
                 .HasColumnName("Type");
 
             builder.Property(q => q.ExamId)
                 .IsRequired()
                 .HasColumnName("ExamId");
-
-            builder.Property(q => q.CreationDate)
-                .IsRequired()
-                .HasColumnType("datetime")
-                .HasDefaultValueSql("GETDATE()");
 
             builder.HasOne(q => q.Exam)
                 .WithMany()

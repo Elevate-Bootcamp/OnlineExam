@@ -10,9 +10,26 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
         {
             builder.ToTable("UserExamAttempts");
 
+            // BaseEntity properties
             builder.HasKey(ua => ua.Id);
             builder.Property(ua => ua.Id).ValueGeneratedOnAdd();
 
+            builder.Property(ua => ua.CreatedAt)
+                .IsRequired()
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("GETDATE()")
+                .HasColumnName("CreatedAt");
+
+            builder.Property(ua => ua.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("UpdatedAt");
+
+            builder.Property(ua => ua.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false)
+                .HasColumnName("IsDeleted");
+
+            // Specific properties
             builder.Property(ua => ua.UserId)
                 .IsRequired()
                 .HasMaxLength(450)
@@ -40,7 +57,6 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
                 .HasDefaultValue(false)
                 .HasColumnName("IsHighestScore");
 
-            // Note: ApplicationUser is not provided; assuming it's an AspNetUsers entity with string Id
             builder.HasOne(ua => ua.User)
                 .WithMany()
                 .HasForeignKey(ua => ua.UserId)
@@ -50,6 +66,12 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
                 .WithMany()
                 .HasForeignKey(ua => ua.ExamId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Navigation to UserAnswers
+            builder.HasMany(ua => ua.UserAnswers)
+                .WithOne(ua => ua.Attempt)
+                .HasForeignKey(ua => ua.AttemptId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

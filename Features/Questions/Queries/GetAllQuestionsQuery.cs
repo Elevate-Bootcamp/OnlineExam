@@ -26,7 +26,7 @@ namespace OnlineExam.Features.Questions.Queries
                     Title = q.Title,
                     ExamId = q.ExamId,
                     Type = q.Type,
-                    CreationDate = q.CreationDate,
+                    CreationDate = q.CreatedAt,
                 }).ToList();
                 return questionDTOs;
             }

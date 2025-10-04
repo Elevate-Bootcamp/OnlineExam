@@ -18,7 +18,7 @@ namespace OnlineExam.Features.Categories.Handlers
             query = request.SortBy switch
             {
                 "name" => query.OrderBy(c => c.Title).ToList(),
-                "creationDate" => query.OrderBy(c => c.CreationDate).ToList(),
+                "creationDate" => query.OrderBy(c => c.CreatedAt).ToList(),
                 _ => query
             };
 
@@ -29,7 +29,7 @@ namespace OnlineExam.Features.Categories.Handlers
                             Id = c.Id,
                             Title = c.Title,
                             IconUrl = c.IconUrl,
-                            CreationDate = c.CreationDate
+                            CreationDate = c.CreatedAt
                         }).ToList();
         }
     

@@ -10,9 +10,26 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
         {
             builder.ToTable("Categories");
 
+            // BaseEntity properties
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Id).ValueGeneratedOnAdd();
 
+            builder.Property(c => c.CreatedAt)
+                .IsRequired()
+                .HasColumnType("datetime")
+                .HasDefaultValueSql("GETDATE()")
+                .HasColumnName("CreatedAt");
+
+            builder.Property(c => c.UpdatedAt)
+                .HasColumnType("datetime")
+                .HasColumnName("UpdatedAt");
+
+            builder.Property(c => c.IsDeleted)
+                .IsRequired()
+                .HasDefaultValue(false)
+                .HasColumnName("IsDeleted");
+
+            // Specific properties
             builder.Property(c => c.Title)
                 .IsRequired()
                 .HasMaxLength(255)
@@ -22,11 +39,6 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
                 .IsRequired()
                 .HasMaxLength(2048)
                 .HasColumnName("IconUrl");
-
-            builder.Property(c => c.CreationDate)
-                .IsRequired()
-                .HasColumnType("datetime")
-                .HasDefaultValueSql("GETDATE()");
 
             builder.Property(c => c.Description)
                 .HasMaxLength(1000)
