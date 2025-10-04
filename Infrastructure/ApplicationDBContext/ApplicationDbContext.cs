@@ -20,6 +20,7 @@ namespace OnlineExam.Infrastructure.ApplicationDBContext
         public DbSet<UserExamAttempt> UserExamAttempts { get; set; }
         public DbSet<EmailQueue> emailQueues { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

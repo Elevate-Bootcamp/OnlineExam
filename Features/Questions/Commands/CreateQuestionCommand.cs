@@ -1,6 +1,41 @@
-﻿namespace OnlineExam.Features.Questions.Commands
+﻿using MediatR;
+using OnlineExam.Domain;
+using OnlineExam.Domain.Interfaces;
+using OnlineExam.Features.Questions.Dtos;
+
+namespace OnlineExam.Features.Questions.Commands
 {
-    public class CreateQuestionCommand
+    public record CreateQuestionCommand(QuestionDTO questionDTO) :IRequest<string>;
+    public class CreateQuestionHandler : IRequestHandler <CreateQuestionCommand,string>
     {
+        private readonly IUnitOfWork _unitOfWork;
+
+
+        public CreateQuestionHandler(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+        public async Task<string> Handle(CreateQuestionCommand request,CancellationToken cancellationToken)
+        {
+            try
+            {
+                var question = new Question
+                {
+                    Title = request.questionDTO.Title,
+                    ExamId = request.questionDTO.ExamId,
+                    Type = request.questionDTO.Type,
+                    CreationDate = DateTime.UtcNow,
+                };
+                var item =  _unitOfWork.Question.AddAsync(question);
+                return "Question created successfully";
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
+
+        }
+
     }
+
 }

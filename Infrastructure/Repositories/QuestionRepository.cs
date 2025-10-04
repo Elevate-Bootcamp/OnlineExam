@@ -1,4 +1,5 @@
-﻿using OnlineExam.Domain;
+﻿using Microsoft.EntityFrameworkCore;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using System.Linq.Expressions;
@@ -14,29 +15,41 @@ namespace OnlineExam.Infrastructure.Repositories
             this.context = context;
         }
 
-        public Task AddAsync(Question entity)
+        public async Task AddAsync(Question entity)
         {
-            throw new NotImplementedException();
+            await context.Questions.AddAsync(entity);
         }
 
-        public Task AddRangeAsync(IEnumerable<Question> entities)
+        public  async Task AddRangeAsync(IEnumerable<Question> entities)
         {
-            throw new NotImplementedException();
+            await context.Questions.AddRangeAsync(entities);
         }
 
-        public Task<int> CountAsync(Expression<Func<Question, bool>>? criteria = null)
+        public async Task<int> CountAsync(Expression<Func<Question, bool>>? criteria = null)
         {
-            throw new NotImplementedException();
+            var count = await context.Questions.CountAsync();
+            return count;
         }
 
         public void Delete(Question entity)
         {
-            throw new NotImplementedException();
+                var question = context.Questions.Find(entity.Id);
+                if (question != null)
+                {
+                    context.Questions.Remove(question);
+                }
         }
 
         public void DeleteRange(IEnumerable<Question> entities)
         {
-            throw new NotImplementedException();
+            foreach(var question in entities)
+            {
+                var item = context.Questions.Find(question.Id);
+                if(item!=null)
+                {
+                    context.Questions.Remove(item);
+                }
+            }
         }
 
         public Task<Question> FirstOrDefaultAsync(Expression<Func<Question, bool>> criteria, params Expression<Func<Question, object>>[] includes)
@@ -44,19 +57,35 @@ namespace OnlineExam.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Question>> GetAllAsync(params Expression<Func<Question, object>>[] includes)
+        public async Task<IEnumerable<Question>> GetAllAsync(params Expression<Func<Question, object>>[] includes)
         {
-            throw new NotImplementedException();
+            return await context.Questions.Include(q=>q.Exam).ToListAsync();
+          
         }
 
-        public Task<Question> GetByIdAsync(int id, params Expression<Func<Question, object>>[] includes)
+        public async Task<Question> GetByIdAsync(int id, params Expression<Func<Question, object>>[] includes)
         {
-            throw new NotImplementedException();
+            //return await  context.Questions.Where(a => a.Id == id).FirstOrDefaultAsync();
+            IQueryable<Question> query = context.Questions;
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+            return await query.FirstOrDefaultAsync(q => q.Id == id);
         }
 
         public void Update(Question entity)
         {
-            throw new NotImplementedException();
+            var question = context.Questions.Find(entity.Id);
+            if (question!=null)
+            {
+                context.Questions.Update(question);
+
+            }
+
         }
     }
 }
