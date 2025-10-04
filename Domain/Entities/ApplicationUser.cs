@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using OnlineExam.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace OnlineExam.Domain
@@ -10,6 +11,9 @@ namespace OnlineExam.Domain
 
         [MaxLength(20)]
         public string Phone { get; set; } = string.Empty;
+
+        public List<RefreshToken>? RefreshTokens { get; set; }
+
 
     }
 }
