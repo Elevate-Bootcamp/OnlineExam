@@ -1,53 +1,113 @@
-﻿using OnlineExam.Domain.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using OnlineExam.Domain.Interfaces;
+using OnlineExam.Infrastructure.ApplicationDBContext;
 using System.Linq.Expressions;
 
 namespace OnlineExam.Infrastructure.Repositories
 {
     public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
     {
-        public Task AddAsync(TEntity entity)
+        private readonly ApplicationDbContext _context;
+        private readonly DbSet<TEntity> _dbSet;
+
+        public GenericRepository(ApplicationDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
+            _dbSet = _context.Set<TEntity>();
         }
 
-        public Task AddRangeAsync(IEnumerable<TEntity> entities)
+        // Add a single entity to the database
+        public async Task AddAsync(TEntity entity)
         {
-            throw new NotImplementedException();
+            await _dbSet.AddAsync(entity);
         }
 
-        public Task<int> CountAsync(Expression<Func<TEntity, bool>>? criteria = null)
+        // Add multiple entities to the database
+        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
         {
-            throw new NotImplementedException();
+            await _dbSet.AddRangeAsync(entities);
         }
 
+        // Count entities with optional criteria
+        public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? criteria = null)
+        {
+            return criteria == null
+                ? await _dbSet.CountAsync()
+                : await _dbSet.CountAsync(criteria);
+        }
+
+        // Delete a single entity
         public void Delete(TEntity entity)
         {
-            throw new NotImplementedException();
+            _dbSet.Remove(entity);
         }
 
+        // Delete multiple entities
         public void DeleteRange(IEnumerable<TEntity> entities)
         {
-            throw new NotImplementedException();
+            _dbSet.RemoveRange(entities);
         }
 
-        public Task<TEntity> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> criteria, params Expression<Func<TEntity, object>>[] includes)
+        // Get the first entity matching criteria (with optional includes)
+        public async Task<TEntity?> FirstOrDefaultAsync(
+            Expression<Func<TEntity, bool>> criteria,
+            params Expression<Func<TEntity, object>>[] includes)
         {
-            throw new NotImplementedException();
+            IQueryable<TEntity> query = _dbSet;
+
+            // Apply includes if provided
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync(criteria);
         }
 
-        public Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes)
+        // Get all entities (with optional includes)
+        public async Task<IEnumerable<TEntity>> GetAllAsync(
+            params Expression<Func<TEntity, object>>[] includes)
         {
-            throw new NotImplementedException();
+            IQueryable<TEntity> query = _dbSet;
+
+            // Apply includes if provided
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            return await query.ToListAsync();
         }
 
-        public Task<TEntity> GetByIdAsync(int id, params Expression<Func<TEntity, object>>[] includes)
+        // Get an entity by its primary key (with optional includes)
+        public async Task<TEntity?> GetByIdAsync(
+            int id,
+            params Expression<Func<TEntity, object>>[] includes)
         {
-            throw new NotImplementedException();
+            IQueryable<TEntity> query = _dbSet;
+
+            // Apply includes if provided
+            if (includes != null)
+            {
+                foreach (var include in includes)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
         }
 
+        // Update an entity
         public void Update(TEntity entity)
         {
-            throw new NotImplementedException();
+            _dbSet.Update(entity);
         }
     }
 }
