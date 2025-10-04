@@ -187,6 +187,7 @@ namespace OnlineExam
             app.MapRegisterEndpoint(); // Map the register endpoint
             app.MapTestEndpoint();
             app.MapLoginEndpoint(); // Map the login endpoint
+            app.MapConfirmEmailEndpoint(); // Map the confirm email endpoint
 
             app.Run();
 
