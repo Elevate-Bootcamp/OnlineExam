@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -30,12 +29,13 @@ namespace OnlineExam.Features.Accounts.Commands
 
         public async Task<ServiceResponse<UserDto>> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
-            if (request.LoginDTO == null || string.IsNullOrEmpty(request.LoginDTO.UserName) || string.IsNullOrEmpty(request.LoginDTO.Password))
+            if (request.LoginDTO == null || string.IsNullOrEmpty(request.LoginDTO.Email) || string.IsNullOrEmpty(request.LoginDTO.Password))
             {
                 return ServiceResponse<UserDto>.ErrorResponse("Invalid login request", "طلب تسجيل دخول غير صالح", 400);
             }
 
-            var user = await _userManager.FindByNameAsync(request.LoginDTO.UserName);
+            // 🔹 Changed: Find user by email instead of username
+            var user = await _userManager.FindByEmailAsync(request.LoginDTO.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.LoginDTO.Password))
             {
                 return ServiceResponse<UserDto>.UnauthorizedResponse();
@@ -50,12 +50,12 @@ namespace OnlineExam.Features.Accounts.Commands
                     403);
             }
 
-            // Generate JWT
+            // 🔹 Changed: Use email for claims instead of username
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, request.LoginDTO.UserName),
-                new Claim(ClaimTypes.Name, request.LoginDTO.UserName),
-                new Claim(ClaimTypes.Email, user.Email ?? "a@b.com"),
+                new Claim(ClaimTypes.NameIdentifier, user.Id), // Use user ID instead of username
+                new Claim(ClaimTypes.Name, user.UserName ?? user.Email), // Use username if exists, otherwise email
+                new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, "user")
             };
 
@@ -78,7 +78,7 @@ namespace OnlineExam.Features.Accounts.Commands
             var userDto = new UserDto
             {
                 IsAuthenticated = true,
-                Username = user.UserName,
+                Username = user.UserName ?? user.Email, // Use email if username is null
                 Email = user.Email,
                 Roles = new List<string> { "user" },
                 Token = tokenString,
@@ -90,11 +90,11 @@ namespace OnlineExam.Features.Accounts.Commands
             return ServiceResponse<UserDto>.SuccessResponse(userDto);
         }
 
-        // Private method to generate a secure refresh token (from Third Part Step 1)
+        // Private method to generate a secure refresh token
         private RefreshToken GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
-            using var generator = RandomNumberGenerator.Create();  // More secure than RNGCryptoServiceProvider
+            using var generator = RandomNumberGenerator.Create();
             generator.GetBytes(randomNumber);
 
             return new RefreshToken
@@ -105,7 +105,7 @@ namespace OnlineExam.Features.Accounts.Commands
             };
         }
 
-        // Private method to get existing active token or generate new one (from Third Part Step 2)
+        // Private method to get existing active token or generate new one
         private RefreshToken GetOrGenerateRefreshToken(ApplicationUser user)
         {
             // Check for existing active refresh token
