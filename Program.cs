@@ -15,6 +15,7 @@ using OnlineExam.Features.Profile.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
 using OnlineExam.Infrastructure.UnitOfWork;
+using OnlineExam.Middlewares;
 using OnlineExam.Shared.Data;
 using OnlineExam.Shared.Helpers;
 using Serilog;
@@ -132,6 +133,9 @@ namespace OnlineExam
             // UnitOfWork first
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            // Add this with your other service registrations
+            builder.Services.AddScoped<TransactionMiddleware>();
+
             // Dynamic generic repositories for BaseEntity subclasses
             var baseEntityAssembly = Assembly.GetAssembly(typeof(BaseEntity)) ?? Assembly.GetExecutingAssembly();  // Fallback if null
             var entityTypes = baseEntityAssembly
@@ -202,6 +206,10 @@ namespace OnlineExam
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<TransactionMiddleware>();
+
+
             app.MapControllers();
             app.MapGet("/", () => "OnlineExam API is running...");
             app.MapRegisterEndpoint(); // Map the register endpoint
