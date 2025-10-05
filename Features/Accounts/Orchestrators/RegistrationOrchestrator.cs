@@ -44,7 +44,10 @@ namespace OnlineExam.Features.Accounts.Orchestrators
                 }
 
                 // Step 2: Send verification email
-                var emailResult = await _mediator.Send(new SendVerificationEmailCommand(user.Id, user.Email), cancellationToken);
+                var emailResult = await _mediator.Send(new SendVerificationEmailCommand(new ResendVerificationCodeDto
+                {
+                   Email = user.Email
+                }), cancellationToken);
                 if (!emailResult.IsSuccess)
                 {
                     // Partial success: User registered, email failed (use SuccessResponse with warning message)

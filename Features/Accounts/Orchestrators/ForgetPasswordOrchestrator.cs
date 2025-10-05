@@ -7,11 +7,11 @@ namespace OnlineExam.Features.Accounts.Orchestrators
 {
     public record OrchestrateForgetPasswordCommand(ForgotPasswordDto Dto) : IRequest<ServiceResponse<bool>>;
 
-    public class Handler : IRequestHandler<OrchestrateForgetPasswordCommand, ServiceResponse<bool>>
+    public class OrchestrateForgetPasswordCommandHandler : IRequestHandler<OrchestrateForgetPasswordCommand, ServiceResponse<bool>>
     {
         private readonly IMediator _mediator;
 
-        public Handler(IMediator mediator)
+        public OrchestrateForgetPasswordCommandHandler(IMediator mediator)
         {
             _mediator = mediator;
         }

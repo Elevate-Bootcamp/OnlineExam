@@ -50,6 +50,7 @@ namespace OnlineExam.Features.Accounts.Orchestrators
                     // Step 2: Mark email as confirmed
                     user.EmailConfirmed = true;
                     await _userManager.UpdateAsync(user);
+                    
 
                     // Step 3: Send welcome email (dispatch SendWelcomeEmailCommand)
                     var welcomeEmailResult = await _mediator.Send(new SendWelcomeEmailCommand(user.Email, user.FullName), cancellationToken);

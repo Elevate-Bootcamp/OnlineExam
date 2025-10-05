@@ -210,6 +210,7 @@ namespace OnlineExam
             app.MapLogoutEndpoint(); // Map the logout endpoint
             app.MapForgotPasswordEndpoint(); // Map the forgot password endpoint
             app.MapResetPasswordEndpoint(); // Map the reset password endpoint
+            app.MapResendVerificationCodeEndpoint(); // Map the resend verification code endpoint
 
 
             app.Use(async (ctx, next) =>
