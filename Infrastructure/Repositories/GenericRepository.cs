@@ -17,19 +17,19 @@ namespace OnlineExam.Infrastructure.Repositories
         }
 
         // Add a single entity to the database
-        public async Task AddAsync(TEntity entity)
+        public virtual async Task AddAsync(TEntity entity)
         {
             await _dbSet.AddAsync(entity);
         }
 
         // Add multiple entities to the database
-        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
+        public virtual async Task AddRangeAsync(IEnumerable<TEntity> entities)
         {
             await _dbSet.AddRangeAsync(entities);
         }
 
         // Count entities with optional criteria
-        public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? criteria = null)
+        public virtual async Task<int> CountAsync(Expression<Func<TEntity, bool>>? criteria = null)
         {
             return criteria == null
                 ? await _dbSet.CountAsync()
@@ -37,19 +37,25 @@ namespace OnlineExam.Infrastructure.Repositories
         }
 
         // Delete a single entity
-        public void Delete(TEntity entity)
+        public virtual void Delete(TEntity entity)
         {
-            _dbSet.Remove(entity);
+            // i want to access the base entity and set its IsDeleted property to true instead of removing it from the database
+            _dbSet.Attach(entity);
+            _context.Entry(entity).Property("IsDeleted").CurrentValue = true;
         }
 
         // Delete multiple entities
-        public void DeleteRange(IEnumerable<TEntity> entities)
+        public virtual void DeleteRange(IEnumerable<TEntity> entities)
         {
-            _dbSet.RemoveRange(entities);
+            foreach (var entity in entities)
+            {
+                _dbSet.Attach(entity);
+                _context.Entry(entity).Property("IsDeleted").CurrentValue = true;
+            }
         }
 
         // Get the first entity matching criteria (with optional includes)
-        public async Task<TEntity?> FirstOrDefaultAsync(
+        public virtual async Task<TEntity?> FirstOrDefaultAsync(
             Expression<Func<TEntity, bool>> criteria,
             params Expression<Func<TEntity, object>>[] includes)
         {
@@ -68,25 +74,13 @@ namespace OnlineExam.Infrastructure.Repositories
         }
 
         // Get all entities (with optional includes)
-        public async Task<IEnumerable<TEntity>> GetAllAsync(
-            params Expression<Func<TEntity, object>>[] includes)
+        public virtual IQueryable<TEntity> GetAll()
         {
-            IQueryable<TEntity> query = _dbSet;
-
-            // Apply includes if provided
-            if (includes != null)
-            {
-                foreach (var include in includes)
-                {
-                    query = query.Include(include);
-                }
-            }
-
-            return await query.ToListAsync();
+            return _dbSet;
         }
 
         // Get an entity by its primary key (with optional includes)
-        public async Task<TEntity?> GetByIdAsync(
+        public virtual async Task<TEntity?> GetByIdAsync(
             int id,
             params Expression<Func<TEntity, object>>[] includes)
         {
@@ -105,7 +99,7 @@ namespace OnlineExam.Infrastructure.Repositories
         }
 
         // Update an entity
-        public void Update(TEntity entity)
+        public virtual void Update(TEntity entity)
         {
             _dbSet.Update(entity);
         }

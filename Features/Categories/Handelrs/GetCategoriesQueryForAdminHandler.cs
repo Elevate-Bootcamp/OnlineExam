@@ -10,15 +10,15 @@ namespace OnlineExam.Features.Categories.Handlers
     {
         public async Task<List<AdminCategoryDto>> Handle(GetCategoriesQueryForAdmin request, CancellationToken cancellationToken)
         {
-            var query = await _categoryRepository.GetAllAsync();
+            var query = _categoryRepository.GetAll();
 
             if (!string.IsNullOrEmpty(request.Search))
-                query = query.Where(c => c.Title.Contains(request.Search)).ToList();
+                query = query.Where(c => c.Title.Contains(request.Search));
 
             query = request.SortBy switch
             {
-                "name" => query.OrderBy(c => c.Title).ToList(),
-                "creationDate" => query.OrderBy(c => c.CreatedAt).ToList(),
+                "name" => query.OrderBy(c => c.Title),
+                "creationDate" => query.OrderBy(c => c.CreatedAt),
                 _ => query
             };
 

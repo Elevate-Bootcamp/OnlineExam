@@ -11,7 +11,7 @@ namespace OnlineExam.Features.Categories.Handlers
        
         public async Task<List<UserCategoryDto>> Handle(GetUserCategoriesQuery request, CancellationToken cancellationToken)
         {
-            var categories = await _categoryRepository.GetAllAsync();
+            var categories = _categoryRepository.GetAll();
 
             return categories
                 .Skip((request.PageNumber - 1) * request.PageSize)

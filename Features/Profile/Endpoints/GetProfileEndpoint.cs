@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using OnlineExam.Features.Accounts.Queries;
+using OnlineExam.Features.Profile.Queries;
 
 namespace OnlineExam.Features.Profile.Endpoints
 {
