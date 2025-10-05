@@ -19,7 +19,7 @@ namespace OnlineExam.Features.Questions.Queries
         {
             try
             {
-                var questions = await _questionRepository.GetAllAsync();
+                var questions = _questionRepository.GetAll();
                 var questionDTOs = questions.Select(q => new QuestionDTO
                 {
                     Id = q.Id,

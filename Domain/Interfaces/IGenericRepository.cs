@@ -6,7 +6,7 @@ namespace OnlineExam.Domain.Interfaces
     public interface IGenericRepository<T> where T : class
     {
         Task<T> GetByIdAsync(int id, params Expression<Func<T, object>>[] includes);
-        Task<IEnumerable<T>> GetAllAsync(params Expression<Func<T, object>>[] includes);
+        IQueryable<T> GetAll();
 
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> criteria, params Expression<Func<T, object>>[] includes);
         Task AddAsync(T entity);

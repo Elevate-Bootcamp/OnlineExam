@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <Folder Include="Domain\Enums\" />
+    <Folder Include="Features\Accounts\Queries\" />
     <Folder Include="Shared\Helpers\" />
     <Folder Include="Shared\Responses\" />
   </ItemGroup>

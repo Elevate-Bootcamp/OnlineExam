@@ -11,9 +11,11 @@ using OnlineExam.Domain.Entities;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Accounts.Commands;
 using OnlineExam.Features.Accounts.Endpoints;
+using OnlineExam.Features.Profile.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
 using OnlineExam.Infrastructure.UnitOfWork;
+using OnlineExam.Middlewares;
 using OnlineExam.Shared.Data;
 using OnlineExam.Shared.Helpers;
 using Serilog;
@@ -131,6 +133,9 @@ namespace OnlineExam
             // UnitOfWork first
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            // Add this with your other service registrations
+            builder.Services.AddScoped<TransactionMiddleware>();
+
             // Dynamic generic repositories for BaseEntity subclasses
             var baseEntityAssembly = Assembly.GetAssembly(typeof(BaseEntity)) ?? Assembly.GetExecutingAssembly();  // Fallback if null
             var entityTypes = baseEntityAssembly
@@ -201,6 +206,10 @@ namespace OnlineExam
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseMiddleware<TransactionMiddleware>();
+
+
             app.MapControllers();
             app.MapGet("/", () => "OnlineExam API is running...");
             app.MapRegisterEndpoint(); // Map the register endpoint
@@ -211,7 +220,8 @@ namespace OnlineExam
             app.MapForgotPasswordEndpoint(); // Map the forgot password endpoint
             app.MapResetPasswordEndpoint(); // Map the reset password endpoint
             app.MapResendVerificationCodeEndpoint(); // Map the resend verification code endpoint
-
+            app.MapProfileEndpoint();
+            app.MapUpdateProfileEndpoint();
 
             app.Use(async (ctx, next) =>
             {

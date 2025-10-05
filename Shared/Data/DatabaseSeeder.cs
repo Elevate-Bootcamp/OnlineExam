@@ -35,6 +35,7 @@ namespace OnlineExam.Shared.Data
                     Email = adminEmail,
                     FirstName = "online exam Admin",
                     LastName = "",
+                    ImageUrl = "tst",
                     EmailConfirmed = true
                 };
                 var result = await userManager.CreateAsync(admin, "Admin@123");

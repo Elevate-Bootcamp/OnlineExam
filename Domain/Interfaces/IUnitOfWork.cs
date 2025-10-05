@@ -4,11 +4,10 @@ namespace OnlineExam.Domain.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-
-
         // Transaction Methods
         Task<int> SaveChangesAsync();
-        Task<IDbContextTransaction> BeginTransactionAsync();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }
-
