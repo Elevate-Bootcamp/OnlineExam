@@ -11,6 +11,7 @@ using OnlineExam.Domain.Entities;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Accounts.Commands;
 using OnlineExam.Features.Accounts.Endpoints;
+using OnlineExam.Features.Profile.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
 using OnlineExam.Infrastructure.UnitOfWork;
@@ -211,7 +212,7 @@ namespace OnlineExam
             app.MapForgotPasswordEndpoint(); // Map the forgot password endpoint
             app.MapResetPasswordEndpoint(); // Map the reset password endpoint
             app.MapResendVerificationCodeEndpoint(); // Map the resend verification code endpoint
-
+            app.MapProfileEndpoint();
 
             app.Use(async (ctx, next) =>
             {

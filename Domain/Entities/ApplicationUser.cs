@@ -17,6 +17,8 @@ namespace OnlineExam.Domain
         [MaxLength(20)]
         public string Phone { get; set; } = string.Empty;
 
+        public string? ImageUrl { get; set; }
+
         public List<RefreshToken>? RefreshTokens { get; set; }
         public virtual ICollection<VerificationCode> VerificationCodes { get; set; } = new List<VerificationCode>();
 
