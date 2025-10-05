@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OnlineExam.Domain;
+using OnlineExam.Domain.Entities;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Accounts.Commands;
 using OnlineExam.Features.Accounts.Endpoints;
@@ -18,8 +19,8 @@ using OnlineExam.Shared.Helpers;
 using Serilog;
 using Serilog.Events;
 using System.Configuration;
-using System.Text;
 using System.Reflection;
+using System.Text;
 
 namespace OnlineExam
 {
@@ -47,21 +48,15 @@ namespace OnlineExam
             builder.Host.UseSerilog();
             builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
             // Services (unchanged)
-            builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
-            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-            builder.Services.AddScoped<IExamRepository, ExamRepository>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
 
 
             builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
             var JwtOption = builder.Configuration.GetSection("JWT").Get<JWT>();
             builder.Services.AddSingleton(JwtOption);
 
-             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => { /* unchanged */ })
-                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                 .AddDefaultTokenProviders();
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => { /* unchanged */ })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 
 
 
@@ -122,7 +117,7 @@ namespace OnlineExam
                 options.EnableSensitiveDataLogging(false);
                 options.EnableServiceProviderCaching();
                 options.EnableDetailedErrors(builder.Environment.IsDevelopment());
-                options.LogTo(message => Log.Debug("[EF] {Message}",message),LogLevel.Warning);
+                options.LogTo(message => Log.Debug("[EF] {Message}", message), LogLevel.Warning);
             });
             //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             //builder.Services.AddDbContext<ApplicationDbContext>(opt =>
@@ -133,6 +128,25 @@ namespace OnlineExam
             builder.Services.AddSwaggerGen();
             builder.Services.AddMediatR(typeof(Program).Assembly);
 
+            // UnitOfWork first
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Dynamic generic repositories for BaseEntity subclasses
+            var baseEntityAssembly = Assembly.GetAssembly(typeof(BaseEntity)) ?? Assembly.GetExecutingAssembly();  // Fallback if null
+            var entityTypes = baseEntityAssembly
+                .GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(typeof(BaseEntity)))
+                .ToList();
+
+            foreach (var entityType in entityTypes)
+            {
+                var interfaceType = typeof(IGenericRepository<>).MakeGenericType(entityType);
+                var implementationType = typeof(GenericRepository<>).MakeGenericType(entityType);
+                builder.Services.AddScoped(interfaceType, implementationType);
+            }
+
+            // Log for debugging (optional)
+            Log.Information("Registered {Count} generic repositories for entities: {Entities}", entityTypes.Count, string.Join(", ", entityTypes.Select(t => t.Name)));
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
             var app = builder.Build();
@@ -193,16 +207,20 @@ namespace OnlineExam
             app.MapTestEndpoint();
             app.MapLoginEndpoint(); // Map the login endpoint
             app.MapConfirmEmailEndpoint(); // Map the confirm email endpoint
+            app.MapLogoutEndpoint(); // Map the logout endpoint
+            app.MapForgotPasswordEndpoint(); // Map the forgot password endpoint
+            app.MapResetPasswordEndpoint(); // Map the reset password endpoint
+            app.MapResendVerificationCodeEndpoint(); // Map the resend verification code endpoint
 
 
-            app.Use(async (ctx,next) =>
+            app.Use(async (ctx, next) =>
             {
                 try { await next(); }
-                catch(FluentValidation.ValidationException ex)
+                catch (FluentValidation.ValidationException ex)
                 {
                     var dict = ex.Errors
                         .GroupBy(e => e.PropertyName ?? "")
-                        .ToDictionary(g => g.Key,g => g.Select(e => e.ErrorMessage).ToArray());
+                        .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
                     await Results.ValidationProblem(dict).ExecuteAsync(ctx);
                 }
             });

@@ -4,6 +4,7 @@ using OnlineExam.Domain;
 using OnlineExam.Domain.Entities;
 using OnlineExam.Infrastructure.EntityConfigurations;
 using StackExchange.Redis;
+using TechZone.Core.Entities;
 
 namespace OnlineExam.Infrastructure.ApplicationDBContext
 {
@@ -18,6 +19,7 @@ namespace OnlineExam.Infrastructure.ApplicationDBContext
         public DbSet<Exam> Exams { get; set; }
         public DbSet<UserExamAttempt> UserExamAttempts { get; set; }
         public DbSet<EmailQueue> emailQueues { get; set; }
+        public DbSet<VerificationCode> VerificationCodes { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

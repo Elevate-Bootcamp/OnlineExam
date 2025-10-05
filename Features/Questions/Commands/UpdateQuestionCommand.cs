@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Questions.Dtos;
 
@@ -8,19 +9,22 @@ namespace OnlineExam.Features.Questions.Commands
     public class UpdateQuestionHandler : IRequestHandler<UpdateQuestionCommand, bool>
     {
         private readonly IUnitOfWork _unitOfWork;
-        public UpdateQuestionHandler(IUnitOfWork unitOfWork)
+        private readonly IGenericRepository<Question> _questionRepository;
+        public UpdateQuestionHandler(IUnitOfWork unitOfWork , IGenericRepository<Question> questionRepository)
         {
             _unitOfWork = unitOfWork;
+            _questionRepository = questionRepository;
         }
         public async Task<bool> Handle(UpdateQuestionCommand request, CancellationToken cancellationToken)
         {
-            var question = await _unitOfWork.Questions.GetByIdAsync(request.Question.Id);
+            var question = await _questionRepository.GetByIdAsync(request.Question.Id);
             if (question == null) return false;
 
             question.Title = request.Question.Title;
             question.ExamId = request.Question.ExamId;  
             question.Type = request.Question.Type;
-            _unitOfWork.Questions.Update(question);
+            _questionRepository.Update(question);
+            await _unitOfWork.SaveChangesAsync();
             return true;
         }
     }

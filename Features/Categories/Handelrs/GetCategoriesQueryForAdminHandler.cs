@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Categories.Dtos;
 using OnlineExam.Features.Categories.Queries;
 
-namespace OnlineExam.Features.Categories.Handelrs
+namespace OnlineExam.Features.Categories.Handlers
 {
-    public class GetCategoriesQueryForAdminHandler(ICategoryRepository _categoryRepository) : IRequestHandler<GetCategoriesQueryForAdmin, List<AdminCategoryDto>>
+    public class GetCategoriesQueryForAdminHandler(IGenericRepository<Category> _categoryRepository) : IRequestHandler<GetCategoriesQueryForAdmin, List<AdminCategoryDto>>
     {
         public async Task<List<AdminCategoryDto>> Handle(GetCategoriesQueryForAdmin request, CancellationToken cancellationToken)
         {
@@ -17,7 +18,7 @@ namespace OnlineExam.Features.Categories.Handelrs
             query = request.SortBy switch
             {
                 "name" => query.OrderBy(c => c.Title).ToList(),
-                "creationDate" => query.OrderBy(c => c.CreationDate).ToList(),
+                "creationDate" => query.OrderBy(c => c.CreatedAt).ToList(),
                 _ => query
             };
 
@@ -28,7 +29,7 @@ namespace OnlineExam.Features.Categories.Handelrs
                             Id = c.Id,
                             Title = c.Title,
                             IconUrl = c.IconUrl,
-                            CreationDate = c.CreationDate
+                            CreationDate = c.CreatedAt
                         }).ToList();
         }
     

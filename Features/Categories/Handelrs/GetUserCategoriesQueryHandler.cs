@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Categories.Dtos;
 using OnlineExam.Features.Categories.Queries;
 
-namespace OnlineExam.Features.Categories.Handelrs
+namespace OnlineExam.Features.Categories.Handlers
 {
-    public class GetUserCategoriesQueryHandler(ICategoryRepository _categoryRepository) : IRequestHandler<GetUserCategoriesQuery, List<UserCategoryDto>>
+    public class GetUserCategoriesQueryHandler(IGenericRepository<Category> _categoryRepository) : IRequestHandler<GetUserCategoriesQuery, List<UserCategoryDto>>
     {
        
         public async Task<List<UserCategoryDto>> Handle(GetUserCategoriesQuery request, CancellationToken cancellationToken)

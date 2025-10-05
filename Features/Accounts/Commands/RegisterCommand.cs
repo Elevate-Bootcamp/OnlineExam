@@ -41,7 +41,9 @@ namespace OnlineExam.Features.Accounts.Commands
                 {
                     Email = request.RegisterDto.Email,
                     UserName = request.RegisterDto.UserName,
-                    FullName = request.RegisterDto.FullName,
+                    FirstName = request.RegisterDto.FirstName,
+                    LastName = request.RegisterDto.LastName,
+                    PhoneNumber = request.RegisterDto.Phone,
                     EmailConfirmed = false
                 };
 

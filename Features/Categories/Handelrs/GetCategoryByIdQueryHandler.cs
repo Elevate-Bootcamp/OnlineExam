@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Categories.Dtos;
 using OnlineExam.Features.Categories.Queries;
 
-namespace OnlineExam.Features.Categories.Handelrs
+namespace OnlineExam.Features.Categories.Handlers
 {
-    public class GetCategoryByIdQueryHandler(ICategoryRepository _categoryRepository) : IRequestHandler<GetCategoryByIdQuery, CategoryDetailsDto>
+    public class GetCategoryByIdQueryHandler(IGenericRepository<Category> _categoryRepository) : IRequestHandler<GetCategoryByIdQuery, CategoryDetailsDto>
     {
       
         public async Task<CategoryDetailsDto> Handle(GetCategoryByIdQuery request, CancellationToken cancellationToken)
@@ -19,7 +20,7 @@ namespace OnlineExam.Features.Categories.Handelrs
                 Id = category.Id,
                 Title = category.Title,
                 IconUrl = category.IconUrl,
-                CreationDate = category.CreationDate
+                CreationDate = category.CreatedAt
             };
         }
     }

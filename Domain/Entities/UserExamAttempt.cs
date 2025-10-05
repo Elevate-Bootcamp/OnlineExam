@@ -3,9 +3,8 @@ using System;
 
 namespace OnlineExam.Domain.Entities
 {
-    public class UserExamAttempt
+    public class UserExamAttempt : BaseEntity
     {
-        public int Id { get; set; }
         public string UserId { get; set; }
         public int ExamId { get; set; }
         public int Score { get; set; }

@@ -33,7 +33,8 @@ namespace OnlineExam.Shared.Data
                 {
                     UserName = "admin",
                     Email = adminEmail,
-                    FullName = "online exam Admin",
+                    FirstName = "online exam Admin",
+                    LastName = "",
                     EmailConfirmed = true
                 };
                 var result = await userManager.CreateAsync(admin, "Admin@123");

@@ -9,23 +9,10 @@ namespace OnlineExam.Infrastructure.UnitOfWork
     {
         private readonly ApplicationDbContext _context;
 
-        // Repository instances
-        public IAnswerRepository Answers { get; }
-        public ICategoryRepository Categories { get; }
-        public IQuestionRepository Questions { get; }
-        public IExamRepository Exams { get; }
-
-        public IQuestionRepository Question => throw new NotImplementedException();
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
-
-            // Initialize repositories
-            Answers = new AnswerRepository(_context);
-            Categories = new CategoryRepository(_context);
-            Questions = new QuestionRepository(_context);
-            Exams = new ExamRepository(_context);
 
         }
 
@@ -34,16 +21,8 @@ namespace OnlineExam.Infrastructure.UnitOfWork
         public Task<IDbContextTransaction> BeginTransactionAsync()
             => _context.Database.BeginTransactionAsync();
 
-        public int Complete() => _context.SaveChanges();
-
-        public Task<int> CompleteAsync() => _context.SaveChangesAsync();
-
         public void Dispose() => _context.Dispose();
 
-        public Task<int> SaveAsync()
-        {
-            return _context.SaveChangesAsync();
-        }
 
         public Task<int> SaveChangesAsync()
         {
