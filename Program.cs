@@ -207,6 +207,9 @@ namespace OnlineExam
             app.MapTestEndpoint();
             app.MapLoginEndpoint(); // Map the login endpoint
             app.MapConfirmEmailEndpoint(); // Map the confirm email endpoint
+            app.MapLogoutEndpoint(); // Map the logout endpoint
+            app.MapForgotPasswordEndpoint(); // Map the forgot password endpoint
+            app.MapResetPasswordEndpoint(); // Map the reset password endpoint
 
 
             app.Use(async (ctx, next) =>
