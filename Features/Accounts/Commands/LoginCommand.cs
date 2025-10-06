@@ -34,14 +34,12 @@ namespace OnlineExam.Features.Accounts.Commands
                 return ServiceResponse<UserDto>.ErrorResponse("Invalid login request", "طلب تسجيل دخول غير صالح", 400);
             }
 
-            // 🔹 Changed: Find user by email instead of username
             var user = await _userManager.FindByEmailAsync(request.LoginDTO.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.LoginDTO.Password))
             {
                 return ServiceResponse<UserDto>.UnauthorizedResponse();
             }
 
-            // Optional: Check if email is confirmed
             if (!user.EmailConfirmed)
             {
                 return ServiceResponse<UserDto>.ErrorResponse(
@@ -50,14 +48,22 @@ namespace OnlineExam.Features.Accounts.Commands
                     403);
             }
 
-            // 🔹 Changed: Use email for claims instead of username
-            var claims = new[]
+            // ✅ FIXED: Get actual user roles from database
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            // ✅ FIXED: Create claims list with actual roles
+            var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id), // Use user ID instead of username
-                new Claim(ClaimTypes.Name, user.UserName ?? user.Email), // Use username if exists, otherwise email
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, "user")
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName ?? user.Email),
+                new Claim(ClaimTypes.Email, user.Email)
             };
+
+            // ✅ FIXED: Add all user roles as role claims
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secretkey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -66,31 +72,31 @@ namespace OnlineExam.Features.Accounts.Commands
                 issuer: _jwtOptions.Issuer,
                 audience: _jwtOptions.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),  // JWT expires in 1 hour
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: creds);
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
             // Refresh Token Logic
             var refreshToken = GetOrGenerateRefreshToken(user);
-            await _userManager.UpdateAsync(user);  // Save if new token added
+            await _userManager.UpdateAsync(user);
 
+            // ✅ FIXED: Use actual roles in UserDto
             var userDto = new UserDto
             {
                 IsAuthenticated = true,
-                Username = user.UserName ?? user.Email, // Use email if username is null
+                Username = user.UserName ?? user.Email,
                 Email = user.Email,
-                Roles = new List<string> { "user" },
+                Roles = userRoles.ToList(), // Actual roles from database
                 Token = tokenString,
-                RefreshToken = refreshToken.Token,  // Include in response
-                RefreshTokenExpiration = refreshToken.ExpiresOn,  // Include expiration
+                RefreshToken = refreshToken.Token,
+                RefreshTokenExpiration = refreshToken.ExpiresOn,
                 EmailConfirmed = user.EmailConfirmed
             };
 
             return ServiceResponse<UserDto>.SuccessResponse(userDto);
         }
 
-        // Private method to generate a secure refresh token
         private RefreshToken GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
@@ -100,24 +106,21 @@ namespace OnlineExam.Features.Accounts.Commands
             return new RefreshToken
             {
                 Token = Convert.ToBase64String(randomNumber),
-                ExpiresOn = DateTime.UtcNow.AddDays(10),  // 10-day expiration
+                ExpiresOn = DateTime.UtcNow.AddDays(10),
                 CreatedOn = DateTime.UtcNow
             };
         }
 
-        // Private method to get existing active token or generate new one
         private RefreshToken GetOrGenerateRefreshToken(ApplicationUser user)
         {
-            // Check for existing active refresh token
             var activeRefreshToken = user.RefreshTokens?.FirstOrDefault(t => t.IsActive);
             if (activeRefreshToken != null)
             {
-                return activeRefreshToken;  // Reuse existing
+                return activeRefreshToken;
             }
 
-            // Generate new one
             var newRefreshToken = GenerateRefreshToken();
-            user.RefreshTokens ??= new List<RefreshToken>();  // Initialize if null
+            user.RefreshTokens ??= new List<RefreshToken>();
             user.RefreshTokens.Add(newRefreshToken);
 
             return newRefreshToken;

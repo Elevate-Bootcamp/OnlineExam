@@ -11,6 +11,7 @@ using OnlineExam.Domain.Entities;
 using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Accounts.Commands;
 using OnlineExam.Features.Accounts.Endpoints;
+using OnlineExam.Features.Categories.Endpoints;
 using OnlineExam.Features.Profile.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
@@ -222,6 +223,14 @@ namespace OnlineExam
             app.MapResendVerificationCodeEndpoint(); // Map the resend verification code endpoint
             app.MapProfileEndpoint();
             app.MapUpdateProfileEndpoint();
+            //category endpoints
+            app.MapGetUserCategoriesEndpoint();
+            app.MapGetCategoriesForAdminEndpoint();
+            app.MapGetCategoryByIdEndpoint();
+            app.MapCreateCategoryEndpoint();
+            app.MapUpdateCategoryEndpoint();
+            app.MapDeleteCategoryEndpoint();
+
 
             app.Use(async (ctx, next) =>
             {
