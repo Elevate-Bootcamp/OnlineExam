@@ -12,11 +12,12 @@ namespace OnlineExam.Features.Categories.Handlers
     {
         private readonly IGenericRepository<Category> _categoryRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHttpContextAccessor _httpContextAccessor = new HttpContextAccessor();
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UpdateCategoryCommandHandler(IGenericRepository<Category> categoryRepository
-            , IUnitOfWork unitOfWork
-            , IHttpContextAccessor httpContextAccessor)
+        public UpdateCategoryCommandHandler(
+            IGenericRepository<Category> categoryRepository,
+            IUnitOfWork unitOfWork,
+            IHttpContextAccessor httpContextAccessor)
         {
             _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
@@ -36,8 +37,6 @@ namespace OnlineExam.Features.Categories.Handlers
                         "مطلوب مصادقة"
                     );
                 }
-                // get all the roles of the user
-                var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
 
                 // Check if user is in Admin role
                 if (!user.IsInRole("Admin"))
@@ -47,6 +46,17 @@ namespace OnlineExam.Features.Categories.Handlers
                         "الوصول ممنوع. مطلوب دور المسؤول."
                     );
                 }
+
+                // Validate that request and DTO are not null
+                if (request?.UpdateCategoryDTo == null)
+                {
+                    return ServiceResponse<int>.ErrorResponse(
+                        "Invalid request data",
+                        "بيانات الطلب غير صالحة",
+                        400
+                    );
+                }
+
                 var category = await _categoryRepository.GetByIdAsync(request.Id);
                 if (category == null)
                 {
@@ -56,18 +66,39 @@ namespace OnlineExam.Features.Categories.Handlers
                     );
                 }
 
-                // Validate file if provided
-                if (request.UpdateCategoryDTo.Icon != null)
+                // Check if at least one field is being updated
+                var titleIsUpdated = !string.IsNullOrWhiteSpace(request.UpdateCategoryDTo.Title);
+                var iconIsUpdated = request.UpdateCategoryDTo.Icon != null && request.UpdateCategoryDTo.Icon.Length > 0;
+
+                if (!titleIsUpdated && !iconIsUpdated)
                 {
-                    if (request.UpdateCategoryDTo.Icon.Length == 0)
+                    return ServiceResponse<int>.ErrorResponse(
+                        "At least one field (Title or Icon) must be provided for update",
+                        "يجب تقديم حقل واحد على الأقل (العنوان أو الأيقونة) للتحديث",
+                        400
+                    );
+                }
+
+                // Update title only if provided
+                if (titleIsUpdated)
+                {
+                    // Check if title is unique (excluding current category)
+                    var existingCategory = await _categoryRepository.FirstOrDefaultAsync(
+                        c => c.Title == request.UpdateCategoryDTo.Title && c.Id != request.Id);
+                    if (existingCategory != null)
                     {
-                        return ServiceResponse<int>.ErrorResponse(
-                            "Icon file is empty",
-                            "ملف الأيقونة فارغ",
-                            400
+                        return ServiceResponse<int>.ConflictResponse(
+                            "Category title must be unique",
+                            "يجب أن يكون عنوان الفئة فريدًا"
                         );
                     }
 
+                    category.Title = request.UpdateCategoryDTo.Title;
+                }
+
+                // Update icon only if provided
+                if (iconIsUpdated)
+                {
                     // Validate file size (e.g., 5MB max)
                     if (request.UpdateCategoryDTo.Icon.Length > 5 * 1024 * 1024)
                     {
@@ -116,9 +147,7 @@ namespace OnlineExam.Features.Categories.Handlers
                     category.IconUrl = "/uploads/" + uniqueFileName;
                 }
 
-                // Update title
-                category.Title = request.UpdateCategoryDTo.Title;
-                category.UpdatedAt = DateTime.UtcNow; // Assuming you have this property
+                category.UpdatedAt = DateTime.UtcNow;
 
                 _categoryRepository.Update(category);
                 await _unitOfWork.SaveChangesAsync();
@@ -131,6 +160,7 @@ namespace OnlineExam.Features.Categories.Handlers
             }
             catch (Exception ex)
             {
+                // Log the exception
                 return ServiceResponse<int>.InternalServerErrorResponse(
                     "An error occurred while updating category",
                     "حدث خطأ أثناء تحديث الفئة"
