@@ -18,6 +18,9 @@ namespace OnlineExam.Features.Categories.Endpoints
             .WithName("UpdateCategory")
             .WithTags("Categories")
             .Produces<ServiceResponse<int>>(StatusCodes.Status200OK)
+            .Produces<ServiceResponse<int>>(StatusCodes.Status400BadRequest)
+            .Produces<ServiceResponse<int>>(StatusCodes.Status401Unauthorized)
+            .Produces<ServiceResponse<int>>(StatusCodes.Status404NotFound)
             .ProducesValidationProblem();
         }
     }

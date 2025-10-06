@@ -4,6 +4,8 @@ using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Categories.Commands;
 using OnlineExam.Features.Categories.Dtos;
 using OnlineExam.Shared.Responses;
+using System.Security.Claims;
+using System.Text;
 
 namespace OnlineExam.Features.Categories.Handlers
 {
@@ -11,17 +13,61 @@ namespace OnlineExam.Features.Categories.Handlers
     {
         private readonly IGenericRepository<Category> _categoryRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CreateCategoryCommandHandler(IGenericRepository<Category> categoryRepository, IUnitOfWork unitOfWork)
+        public CreateCategoryCommandHandler(
+            IGenericRepository<Category> categoryRepository,
+            IUnitOfWork unitOfWork,
+            IHttpContextAccessor httpContextAccessor)
         {
             _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor; // Remove the manual new() assignment
         }
 
         public async Task<ServiceResponse<int>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
         {
             try
             {
+                // Check if user is authenticated
+                var user = _httpContextAccessor.HttpContext?.User;
+                if (user?.Identity?.IsAuthenticated != true)
+                {
+                    return ServiceResponse<int>.UnauthorizedResponse(
+                        "Authentication required",
+                        "مطلوب مصادقة"
+                    );
+                }
+
+                // Check if user is in Admin role
+                if (!user.IsInRole("Admin"))
+                {
+                    return ServiceResponse<int>.ForbiddenResponse(
+                        "Access forbidden. Admin role required.",
+                        "الوصول ممنوع. مطلوب دور المسؤول."
+                    );
+                }
+
+                // Validate that request and DTO are not null
+                if (request?.CreateCategoryDTo == null)
+                {
+                    return ServiceResponse<int>.ErrorResponse(
+                        "Invalid request data",
+                        "بيانات الطلب غير صالحة",
+                        400
+                    );
+                }
+
+                // Validate Title
+                if (string.IsNullOrWhiteSpace(request.CreateCategoryDTo.Title))
+                {
+                    return ServiceResponse<int>.ErrorResponse(
+                        "Title is required",
+                        "العنوان مطلوب",
+                        400
+                    );
+                }
+
                 // Validate file
                 if (request.CreateCategoryDTo.Icon == null || request.CreateCategoryDTo.Icon.Length == 0)
                 {
@@ -49,8 +95,18 @@ namespace OnlineExam.Features.Categories.Handlers
                 {
                     return ServiceResponse<int>.ErrorResponse(
                         "Only image files are allowed (jpg, jpeg, png, gif, svg)",
-                        "يُسمح فقط بملفات الصور (jpg, jpeg, png, gif, svg)",
+                        "يُسمح فقط بملfiles الصور (jpg, jpeg, png, gif, svg)",
                         400
+                    );
+                }
+
+                // Validate title is unique
+                var existingCategory = await _categoryRepository.FirstOrDefaultAsync(c => c.Title == request.CreateCategoryDTo.Title);
+                if (existingCategory != null)
+                {
+                    return ServiceResponse<int>.ConflictResponse(
+                        "Category title must be unique",
+                        "يجب أن يكون عنوان الفئة فريدًا"
                     );
                 }
 
@@ -84,7 +140,10 @@ namespace OnlineExam.Features.Categories.Handlers
             }
             catch (Exception ex)
             {
-                // Log the exception
+                // Log the actual exception for debugging
+                // _logger.LogError(ex, "Error creating category");
+
+                // Safe error handling - don't access request properties in catch block
                 return ServiceResponse<int>.InternalServerErrorResponse(
                     "An error occurred while creating category",
                     "حدث خطأ أثناء إنشاء الفئة"

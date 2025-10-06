@@ -208,6 +208,7 @@ namespace OnlineExam
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseMiddleware<FormContentTypeValidationMiddleware>();
             app.UseMiddleware<TransactionMiddleware>();
 
 
