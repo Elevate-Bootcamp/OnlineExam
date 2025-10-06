@@ -12,6 +12,7 @@ using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Accounts.Commands;
 using OnlineExam.Features.Accounts.Endpoints;
 using OnlineExam.Features.Categories.Endpoints;
+using OnlineExam.Features.Exams.Endpoints;
 using OnlineExam.Features.Profile.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
@@ -231,6 +232,10 @@ namespace OnlineExam
             app.MapCreateCategoryEndpoint();
             app.MapUpdateCategoryEndpoint();
             app.MapDeleteCategoryEndpoint();
+            // Register Exam endpoints
+            app.MapUserExamEndpoints();
+            app.MapAdminExamEndpoints();
+            app.MapGetExamByIDEndpoint();
 
 
             app.Use(async (ctx, next) =>
