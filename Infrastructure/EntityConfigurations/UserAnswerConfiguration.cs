@@ -38,19 +38,17 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
                 .IsRequired()
                 .HasColumnName("QuestionId");
 
-            builder.Property(ua => ua.SelectedChoiceIds)
-                .IsRequired()
-                .HasMaxLength(1000)
-                .HasColumnName("SelectedChoiceIds");
-
-            builder.Property(ua => ua.IsCorrect)
-                .IsRequired()
-                .HasColumnName("IsCorrect");
-
+            // Relationships
             builder.HasOne(ua => ua.Attempt)
                 .WithMany(a => a.UserAnswers)
                 .HasForeignKey(ua => ua.AttemptId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade); // Keep cascade for Attempt
+
+            builder.HasOne(ua => ua.Question)
+                .WithMany(q => q.UserAnswers)
+                .HasForeignKey(ua => ua.QuestionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }

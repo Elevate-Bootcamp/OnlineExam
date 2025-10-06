@@ -7,8 +7,6 @@ namespace OnlineExam.Domain
 {
     public class ApplicationUser : IdentityUser
     {
-        //[MaxLength(100)]
-        //public string FullName { get; set; } = string.Empty;
         [MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;
         [MaxLength(50)]

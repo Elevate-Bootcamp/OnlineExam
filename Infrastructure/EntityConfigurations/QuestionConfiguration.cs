@@ -46,10 +46,17 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
                 .IsRequired()
                 .HasColumnName("ExamId");
 
+
             builder.HasOne(q => q.Exam)
-                .WithMany()
-                .HasForeignKey(q => q.ExamId)
-                .OnDelete(DeleteBehavior.Cascade);
+           .WithMany(e => e.Questions)
+           .HasForeignKey(q => q.ExamId)
+           .OnDelete(DeleteBehavior.NoAction); // Or NoAction if needed
+
+            // If you have a navigation property from Question to UserAnswer
+            builder.HasMany(q => q.UserAnswers)
+                .WithOne(ua => ua.Question)
+                .HasForeignKey(ua => ua.QuestionId)
+                .OnDelete(DeleteBehavior.NoAction); // Important: NoAction here too
         }
     }
 }

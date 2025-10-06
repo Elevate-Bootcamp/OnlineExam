@@ -11,6 +11,9 @@ namespace OnlineExam.Domain.Entities
         public int TotalQuestions { get; set; }
         public DateTime AttemptDate { get; set; }
         public bool IsHighestScore { get; set; } = false;
+        public DateTime? FinishedAt { get; set; }
+        public int AttemptNumber { get; set; }
+
         // Navigation properties
         public ApplicationUser User { get; set; }
         public Exam Exam { get; set; }

@@ -13,13 +13,15 @@ namespace OnlineExam.Infrastructure.ApplicationDBContext
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }   
-        public DbSet<UserAnswer> Answers { get; set; }
+        public DbSet<UserAnswer> userAnswers { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Exam> Exams { get; set; }
         public DbSet<UserExamAttempt> UserExamAttempts { get; set; }
         public DbSet<EmailQueue> emailQueues { get; set; }
         public DbSet<VerificationCode> VerificationCodes { get; set; }
+        public DbSet<Choice> Choices { get; set; }
+        public DbSet<UserSelectedChoice> UserSelectedChoices { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -2,8 +2,7 @@
 {
     public enum QuestionType
     {
-        MCQ=1,
-        TrueFalse,
-        Essay
+        MultipleChoice = 1,
+        multipleSelect = 2
     }
 }

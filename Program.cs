@@ -236,6 +236,7 @@ namespace OnlineExam
             app.MapUserExamEndpoints();
             app.MapAdminExamEndpoints();
             app.MapGetExamByIDEndpoint();
+            app.MapStartExamAttemptEndpoint();
 
 
             app.Use(async (ctx, next) =>
