@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using OnlineExam.Features.Categories.Dtos;
 using OnlineExam.Features.Categories.Queries;
 using OnlineExam.Shared.Responses;
 
@@ -13,10 +14,11 @@ namespace OnlineExam.Features.Categories.Endpoints
                 var result = await mediator.Send(new GetCategoryByIdQuery(id));
                 return result;
             })
-            .RequireAuthorization()
+            //.RequireAuthorization()
             .WithName("GetCategoryById")
             .WithTags("Categories")
             .Produces<ServiceResponse<object>>(StatusCodes.Status200OK)
+            .Produces<ServiceResponse<object>>(StatusCodes.Status401Unauthorized)
             .Produces<ServiceResponse<object>>(StatusCodes.Status404NotFound);
         }
     }

@@ -8,5 +8,8 @@ namespace OnlineExam.Domain
         public string Title { get; set; } = null!;
         public string IconUrl { get; set; } = null!;
         public string? Description { get; set; }
+
+        // navigation property
+        public virtual ICollection<Exam>? Exams { get; set; }
     }
 }

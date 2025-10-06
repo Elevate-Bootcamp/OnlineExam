@@ -23,6 +23,7 @@ namespace OnlineExam.Features.Categories.Endpoints
                 var result = await mediator.Send(new GetCategoriesQueryForAdmin(pageNumber, pageSize, search, sortBy));
                 return result;
             })
+            .RequireAuthorization()
             .WithName("GetCategoriesForAdmin")
             .WithTags("Categories")
             .Produces<ServiceResponse<PagedResult<AdminCategoryDto>>>(StatusCodes.Status200OK)

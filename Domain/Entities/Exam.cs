@@ -1,5 +1,6 @@
 ﻿using OnlineExam.Domain.Entities;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OnlineExam.Domain
 {
@@ -7,6 +8,7 @@ namespace OnlineExam.Domain
     {
         public string Title { get; set; } = null!;
         public string IconUrl { get; set; } = null!;
+        [ForeignKey(nameof(Category))]
         public int CategoryId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -15,7 +17,7 @@ namespace OnlineExam.Domain
         public string? Description { get; set; }
 
         // navigation property
-        public Category? Category { get; set; }
+        public virtual Category? Category { get; set; }
 
     }
 }

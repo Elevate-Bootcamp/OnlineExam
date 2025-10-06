@@ -9,18 +9,29 @@ namespace OnlineExam.Features.Categories.Handlers
 {
     public class GetUserCategoriesQueryHandler : IRequestHandler<GetUserCategoriesQuery, ServiceResponse<PagedResult<UserCategoryDto>>>
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IGenericRepository<Category> _categoryRepository;
 
-        public GetUserCategoriesQueryHandler(IGenericRepository<Category> categoryRepository)
+        public GetUserCategoriesQueryHandler(IGenericRepository<Category> categoryRepository, IHttpContextAccessor httpContextAccessor)
         {
             _categoryRepository = categoryRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ServiceResponse<PagedResult<UserCategoryDto>>> Handle(GetUserCategoriesQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                var categories = _categoryRepository.GetAll();
+                // Check if user is authenticated
+                var user = _httpContextAccessor.HttpContext?.User;
+                if (user?.Identity?.IsAuthenticated != true)
+                {
+                    return ServiceResponse<PagedResult<UserCategoryDto>>.UnauthorizedResponse(
+                        "Authentication required",
+                        "مطلوب مصادقة"
+                    );
+                }
+                var categories = _categoryRepository.GetAll().Where(category => category.IsDeleted==false);
 
                 // Get total count before pagination
                 var totalCount = categories.Count();

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OnlineExam.Domain;
-using OnlineExam.Domain.Enums;
 
 namespace OnlineExam.Infrastructure.EntityConfigurations
 {
@@ -68,9 +67,12 @@ namespace OnlineExam.Infrastructure.EntityConfigurations
                 .HasMaxLength(1000)
                 .HasColumnName("Description");
 
+            // ✅ FIXED: Only ONE relationship configuration
             builder.HasOne(e => e.Category)
-                .WithMany()
+                .WithMany(c => c.Exams) // Use this if Category has Exams collection
+                                        // .WithMany() // Use this if Category does NOT have Exams collection
                 .HasForeignKey(e => e.CategoryId)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

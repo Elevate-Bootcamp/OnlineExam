@@ -18,10 +18,13 @@ namespace OnlineExam.Features.Categories.Endpoints
                 var result = await mediator.Send(new GetUserCategoriesQuery(pageNumber, pageSize));
                 return result;
             })
-            .RequireAuthorization()
+            //.RequireAuthorization()
             .WithName("GetUserCategories")
             .WithTags("Categories")
-            .Produces<ServiceResponse<PagedResult<object>>>(StatusCodes.Status200OK);
+            .Produces<ServiceResponse<object>>(StatusCodes.Status200OK)
+            .Produces<ServiceResponse<object>>(StatusCodes.Status401Unauthorized)
+            .Produces<ServiceResponse<object>>(StatusCodes.Status404NotFound);
+
         }
     }
 }
