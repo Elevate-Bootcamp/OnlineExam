@@ -14,6 +14,7 @@ using OnlineExam.Features.Accounts.Endpoints;
 using OnlineExam.Features.Categories.Endpoints;
 using OnlineExam.Features.Exams.Endpoints;
 using OnlineExam.Features.Profile.Endpoints;
+using OnlineExam.Features.Questions.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
 using OnlineExam.Infrastructure.UnitOfWork;
@@ -216,7 +217,6 @@ namespace OnlineExam
             app.MapControllers();
             app.MapGet("/", () => "OnlineExam API is running...");
             app.MapRegisterEndpoint(); // Map the register endpoint
-            app.MapTestEndpoint();
             app.MapLoginEndpoint(); // Map the login endpoint
             app.MapConfirmEmailEndpoint(); // Map the confirm email endpoint
             app.MapLogoutEndpoint(); // Map the logout endpoint
@@ -241,6 +241,8 @@ namespace OnlineExam
             app.MapCreateExamEndpoint();
             app.MapDeleteExamEndpoint();
             app.MapEditExamEndpoint();
+            // Register Question endpoints
+            app.MapAdminQuestionEndpoint();
 
 
             app.Use(async (ctx, next) =>
