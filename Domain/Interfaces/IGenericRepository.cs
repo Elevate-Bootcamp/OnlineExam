@@ -13,6 +13,7 @@ namespace OnlineExam.Domain.Interfaces
         Task AddRangeAsync(IEnumerable<T> entities);
         void Update(T entity);
         void Delete(T entity);
+        void HardDelete(T entity);
         void DeleteRange(IEnumerable<T> entities);
 
         Task<int> CountAsync(Expression<Func<T, bool>>? criteria = null);

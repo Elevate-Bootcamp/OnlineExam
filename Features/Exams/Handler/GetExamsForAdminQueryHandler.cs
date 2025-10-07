@@ -1,26 +1,52 @@
 ﻿using MediatR;
 using OnlineExam.Domain;
 using OnlineExam.Domain.Interfaces;
+using OnlineExam.Features.Categories.Dtos;
 using OnlineExam.Features.Exams.Dtos;
 using OnlineExam.Features.Exams.Queries;
 using OnlineExam.Shared.Responses;
+using System.Security.Claims;
 
 namespace OnlineExam.Features.Exams.Handlers
 {
     public class GetExamsForAdminQueryHandler : IRequestHandler<GetExamsForAdminQuery, ServiceResponse<PagedResult<AdminExamDto>>>
     {
         private readonly IGenericRepository<Exam> _examRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public GetExamsForAdminQueryHandler(IGenericRepository<Exam> examRepository)
+        public GetExamsForAdminQueryHandler(IGenericRepository<Exam> examRepository,
+            IHttpContextAccessor httpContextAccessor)
         {
             _examRepository = examRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ServiceResponse<PagedResult<AdminExamDto>>> Handle(GetExamsForAdminQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                var query = _examRepository.GetAll().Where(e => !e.IsDeleted);
+                // Check if user is authenticated
+                var user = _httpContextAccessor.HttpContext?.User;
+                if (user?.Identity?.IsAuthenticated != true)
+                {
+                    return ServiceResponse<PagedResult<AdminExamDto>>.UnauthorizedResponse(
+                        "Authentication required",
+                        "مطلوب مصادقة"
+                    );
+                }
+                // get all the roles of the user
+                var roles = user.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+
+                // Check if user is in Admin role
+                if (!user.IsInRole("Admin"))
+                {
+                    return ServiceResponse<PagedResult<AdminExamDto>>.ForbiddenResponse(
+                        "Access forbidden. Admin role required.",
+                        "الوصول ممنوع. مطلوب دور المسؤول."
+                    );
+                }
+
+                var query = _examRepository.GetAll();
 
                 // Apply search filter
                 if (!string.IsNullOrEmpty(request.Search))
@@ -68,7 +94,8 @@ namespace OnlineExam.Features.Exams.Handlers
                         Duration = e.Duration,
                         IsActive = e.IsActive,
                         CreationDate = e.CreatedAt,
-                        Description = e.Description
+                        Description = e.Description,
+                        IsDeleted = e.IsDeleted
                     })
                     .ToList();
 

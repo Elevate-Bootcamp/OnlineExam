@@ -105,7 +105,6 @@ namespace OnlineExam.Features.Exams.Handlers
                 // check if the user take the exam before
                 var previousAttempts = await _examAttemptRepository.GetAll().Where(a => a.UserId == userId && a.ExamId == request.ExamId)
                     .ToListAsync();
-                var attemptNumber = previousAttempts.Count + 1;
                 //add in the userexamattempt table the start time and the user id and the exam id when the user start the exam
                 var ongoingAttempt = previousAttempts.FirstOrDefault(a => a.FinishedAt == null);
 
@@ -123,6 +122,7 @@ namespace OnlineExam.Features.Exams.Handlers
                         );
                     }
                 }
+                var attemptNumber = previousAttempts.Count + 1;
 
                 var userExamAttempt = new UserExamAttempt
                 {

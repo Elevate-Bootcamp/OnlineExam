@@ -1,18 +1,11 @@
 ﻿using MediatR;
+using OnlineExam.Features.Exams.Dtos;
+using OnlineExam.Shared.Responses;
 
 namespace OnlineExam.Features.Exams.Commands
 {
-    public sealed record CreateExamCommand(
-     string Title,
-     string IconUrl,
-     int? CategoryId,
-     DateTime StartDate,
-     DateTime EndDate,
-     int DurationMinutes,
-     string? Description
-                               ):IRequest<int>;
+    public record CreateExamCommand(CreateExamDto CreateExamDto) : IRequest<ServiceResponse<int>>;
 
 }
-
 
 

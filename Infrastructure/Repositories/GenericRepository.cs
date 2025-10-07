@@ -41,7 +41,19 @@ namespace OnlineExam.Infrastructure.Repositories
         {
             // i want to access the base entity and set its IsDeleted property to true instead of removing it from the database
             _dbSet.Attach(entity);
+            //detedat = time.now
             _context.Entry(entity).Property("IsDeleted").CurrentValue = true;
+            _context.Entry(entity).Property("DeletedAt").CurrentValue = DateTime.UtcNow;
+        }
+
+        public virtual void HardDelete(TEntity entity)
+        {
+            // if the isdeleted = false then use delete method without removing it from the database
+            var isDeleted = (bool)_context.Entry(entity).Property("IsDeleted").CurrentValue;
+            if (isDeleted)
+                _dbSet.Remove(entity);
+            else
+                Delete(entity);
         }
 
         // Delete multiple entities
