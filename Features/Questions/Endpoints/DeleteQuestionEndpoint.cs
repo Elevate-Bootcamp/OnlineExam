@@ -6,7 +6,7 @@ namespace OnlineExam.Features.Questions.Endpoints
 {
     public static class DeleteQuestionEndpoint
     {
-        public static void MapDeleteQuestionEndpoints(this WebApplication app)
+        public static void MapDeleteQuestionEndpoint(this WebApplication app)
         {
             var group = app.MapGroup("/api/questions")
                 .WithTags("Questions");

@@ -243,9 +243,10 @@ namespace OnlineExam
             app.MapEditExamEndpoint();
             // Register Question endpoints
             app.MapAdminQuestionEndpoint();
-            app.MapAddQuestionEndpoints();
-            app.MapUpdateQuestionEndpoints();
-            app.MapDeleteQuestionEndpoints();
+            app.MapAddQuestionEndpoint();
+            app.MapUpdateQuestionEndpoint();
+            app.MapDeleteQuestionEndpoint();
+            app.MapGetQuestionDetailsEndpoint();
 
 
             app.Use(async (ctx, next) =>

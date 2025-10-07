@@ -8,7 +8,7 @@ namespace OnlineExam.Features.Questions.Endpoints
 {
     public static class AddQuestionEndpoint
     {
-        public static void MapAddQuestionEndpoints(this WebApplication app)
+        public static void MapAddQuestionEndpoint(this WebApplication app)
         {
             app.MapPost("/api/questions", async (
                 IMediator mediator,

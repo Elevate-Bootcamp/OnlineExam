@@ -7,7 +7,7 @@ namespace OnlineExam.Features.Questions.Endpoints
 {
     public static class UpdateQuestionEndpoint
     {
-        public static void MapUpdateQuestionEndpoints(this WebApplication app)
+        public static void MapUpdateQuestionEndpoint(this WebApplication app)
         {                
             // PUT /api/questions/{id} - Update a question and its choices
             app.MapPut("/api/questions/{id}", async (
