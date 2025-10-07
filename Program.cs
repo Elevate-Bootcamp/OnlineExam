@@ -189,6 +189,7 @@ namespace OnlineExam
                     Log.Warning("⚠️ Application will continue without seeding");
                 }
             }
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
 
             // Trust the dev certificate on startup
@@ -214,7 +215,8 @@ namespace OnlineExam
 
             app.UseMiddleware<FormContentTypeValidationMiddleware>();
             app.UseMiddleware<TransactionMiddleware>();
-
+            app.UseMiddleware<RateLimitingMiddleware>();
+            app.UseMiddleware<ProfilingMiddleware>();
 
             app.MapControllers();
             app.MapGet("/", () => "OnlineExam API is running...");
