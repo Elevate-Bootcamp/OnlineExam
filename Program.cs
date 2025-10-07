@@ -240,6 +240,7 @@ namespace OnlineExam
             app.MapSubmitExamEndpoint();
             app.MapCreateExamEndpoint();
             app.MapDeleteExamEndpoint();
+            app.MapEditExamEndpoint();
 
 
             app.Use(async (ctx, next) =>
