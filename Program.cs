@@ -244,6 +244,7 @@ namespace OnlineExam
             // Register Question endpoints
             app.MapAdminQuestionEndpoint();
             app.MapAddQuestionEndpoints();
+            app.MapUpdateQuestionEndpoints();
 
 
             app.Use(async (ctx, next) =>
