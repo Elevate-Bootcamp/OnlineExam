@@ -12,6 +12,7 @@ using OnlineExam.Domain.Interfaces;
 using OnlineExam.Features.Accounts.Commands;
 using OnlineExam.Features.Accounts.Endpoints;
 using OnlineExam.Features.Categories.Endpoints;
+using OnlineExam.Features.Dashboard.Endpoints;
 using OnlineExam.Features.Exams.Endpoints;
 using OnlineExam.Features.Profile.Endpoints;
 using OnlineExam.Features.Questions.Endpoints;
@@ -224,6 +225,7 @@ namespace OnlineExam
             app.MapForgotPasswordEndpoint(); // Map the forgot password endpoint
             app.MapResetPasswordEndpoint(); // Map the reset password endpoint
             app.MapResendVerificationCodeEndpoint(); // Map the resend verification code endpoint
+           //profile endpoints
             app.MapProfileEndpoint();
             app.MapUpdateProfileEndpoint();
             //category endpoints
@@ -251,7 +253,10 @@ namespace OnlineExam
             // Register UserAnswer endpoints
             app.MapGetAllUserAnswersEndpoints();
             app.MapGetDetailedUserAnswerEndpoint();
-
+            // Register Dashboard endpoints
+            app.MapDashboardStatsEndpoints();
+            app.MapMostActiveExamsEndpoints();
+            app.MapMostActiveCategoriesEndpoints();
 
             app.Use(async (ctx, next) =>
             {
