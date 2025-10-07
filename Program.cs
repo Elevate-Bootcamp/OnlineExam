@@ -126,10 +126,8 @@ namespace OnlineExam
                 options.EnableDetailedErrors(builder.Environment.IsDevelopment());
                 options.LogTo(message => Log.Debug("[EF] {Message}", message), LogLevel.Warning);
             });
-            //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            //builder.Services.AddDbContext<ApplicationDbContext>(opt =>
-            //    opt.UseSqlServer(connectionString));
 
+            builder.Services.AddMemoryCache();
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
