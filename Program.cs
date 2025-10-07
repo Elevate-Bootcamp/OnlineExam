@@ -15,6 +15,7 @@ using OnlineExam.Features.Categories.Endpoints;
 using OnlineExam.Features.Exams.Endpoints;
 using OnlineExam.Features.Profile.Endpoints;
 using OnlineExam.Features.Questions.Endpoints;
+using OnlineExam.Features.UserAnswers.Endpoints;
 using OnlineExam.Infrastructure.ApplicationDBContext;
 using OnlineExam.Infrastructure.Repositories;
 using OnlineExam.Infrastructure.UnitOfWork;
@@ -247,6 +248,9 @@ namespace OnlineExam
             app.MapUpdateQuestionEndpoint();
             app.MapDeleteQuestionEndpoint();
             app.MapGetQuestionDetailsEndpoint();
+            // Register UserAnswer endpoints
+            app.MapGetAllUserAnswersEndpoints();
+            app.MapGetDetailedUserAnswerEndpoint();
 
 
             app.Use(async (ctx, next) =>
